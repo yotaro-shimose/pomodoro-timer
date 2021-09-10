@@ -1,0 +1,64 @@
+swagger: "2.0"
+info:
+  description: "Googleカレンダーとの連携API"
+  version: "1.0.0"
+  title: "Pomodoro-Timer API"
+host: "localhost:8000"
+paths:
+  /task:
+    get:
+      summary: "タスク一覧取得"
+      parameters:
+        - in: header
+          name: token
+          required: true
+          schema:
+            type: string
+            example: ""
+      description: "ユーザーの保持するタスクをすべて取得する"
+      responses:
+        200:
+          description: "成功時のレスポンス"
+          schema:
+            type: "object"
+            properties:
+              taskList:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "string"
+                    name:
+                      type: "string"
+                  example:
+                    id: "0"
+                    name: "平方根"
+            example: [{ id: "0", name: "平方根" }, { id: "1", name: "散歩" }]
+  /schedule:
+    post:
+      summary: "スケジュール登録"
+      parameters:
+        - in: "body"
+          name: "schedule"
+          schema:
+            type: "object"
+            properties:
+              task:
+                type: "object"
+                properties:
+                  id:
+                    type: "string"
+                  name:
+                    type: "string"
+              start:
+                type: "string"
+              end:
+                type: "string"
+      description: "行った作業をスケジュールに登録する"
+      responses:
+        200:
+          description: "成功"
+          schema:
+            type: "string"
+            example: "sucess!"
