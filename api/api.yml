@@ -7,6 +7,8 @@ host: "localhost:8000"
 paths:
   /task:
     get:
+      tags:
+        - "1st sprint"
       summary: "タスク一覧取得"
       parameters:
         - in: header
@@ -37,6 +39,8 @@ paths:
             example: [{ id: "0", name: "平方根" }, { id: "1", name: "散歩" }]
   /schedule:
     post:
+      tags:
+        - "1st sprint"
       summary: "スケジュール登録"
       parameters:
         - in: "body"
