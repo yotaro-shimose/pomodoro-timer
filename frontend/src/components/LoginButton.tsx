@@ -40,7 +40,7 @@ const LoginButton: FC = () => {
     return (
         <div className="LoginButton">
             <GoogleLogin
-                clientId="658977310896-knrl3gka66fldh83dao2rhgbblmd4un9.apps.googleusercontent.com"
+                clientId={googleClientId}
                 buttonText="Login"
                 onSuccess={handleGoogleLogin}
                 onFailure={onFailure}
