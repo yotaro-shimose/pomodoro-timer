@@ -43,6 +43,12 @@ paths:
         - "1st sprint"
       summary: "スケジュール登録"
       parameters:
+        - in: header
+          name: "token"
+          required: true
+          schema:
+            type: string
+            example: ""
         - in: "body"
           name: "schedule"
           schema:
