@@ -4,33 +4,25 @@ import axios from 'axios';
 const baseURL = "http://localhost:8000";
 
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-const drfClientId = process.env.REACT_APP_DRF_CLIENT_ID;
-const drfClientSecret = process.env.REACT_APP_DRF_CLIENT_SECRET;
 
 const isGoogleLoginResponse = (item: any): item is GoogleLoginResponse => item.accessToken !== undefined;
 
 const handleGoogleLogin = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
     if (!isGoogleLoginResponse(response)) {
-        console.log("Use Online Access Type");
-    } else {
         axios
-            .post(`${baseURL}/auth/convert-token`, {
-                token: response.accessToken,
-                backend: "google-oauth2",
-                grant_type: "convert_token",
-                client_id: drfClientId,
-                client_secret: drfClientSecret,
-            })
-            .then((res) => {
-                const { access_token, refresh_token } = res.data;
-                console.log({ access_token, refresh_token });
-                // TODO use hooks!
-                localStorage.setItem("access_token", access_token);
-                localStorage.setItem("refresh_token", refresh_token);
-            })
-            .catch((err) => {
-                console.log("Error Google login", err);
-            });
+            .post(`${baseURL}/fetch_token`,
+                {
+                    authorizationCode: response.code
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+            .then((res) => console.log(res));
+    } else {
+        console.log("Unexpected");
+
     }
 };
 
@@ -44,7 +36,12 @@ const LoginButton: FC = () => {
                 buttonText="Login"
                 onSuccess={handleGoogleLogin}
                 onFailure={onFailure}
-                cookiePolicy={'single_host_origin'}
+                prompt="consent"
+                responseType="code"
+                accessType="offline"
+                scope="https://www.googleapis.com/auth/calendar"
+                isSignedIn={true}
+                redirectUri="postmessage"
             />
         </div>
 
