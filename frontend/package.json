@@ -10,6 +10,7 @@
     "@types/react": "^17.0.20",
     "@types/react-dom": "^17.0.9",
     "axios": "^0.21.4",
+    "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@material-ui/core": "^4.12.3",
+    "@types/lodash": "^4.14.173",
     "@types/node": "^16.9.1",
     "react-google-login": "^5.2.2",
     "react-timer-hook": "^3.0.4"
