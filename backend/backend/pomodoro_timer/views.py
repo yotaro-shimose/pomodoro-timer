@@ -21,9 +21,11 @@ def parse_body(body: bytes) -> dict[str, str]:
 
 
 def get_task(request: HttpRequest) -> HttpResponse:
-    access_token = request.GET["access_token"]
+    access_token = request.META["access_token"]
+    refresh_token = request.META["refresh_token"]
     credentials = Credentials(
-        access_token,
+        token=access_token,
+        refresh_token=refresh_token,
         token_uri="https://oauth2.googleapis.com/token",
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
@@ -33,13 +35,17 @@ def get_task(request: HttpRequest) -> HttpResponse:
 
     now = datetime.datetime.utcnow().isoformat() + "Z"
     service = build("calendar", "v3", credentials=credentials)
-    service.events().list(
-        calendarId="primary",
-        timeMin=now,
-        maxResults=10,
-        singleEvents=True,
-        orderBy="startTime",
-    ).execute()
+    res = (
+        service.events()
+        .list(
+            calendarId="primary",
+            timeMin=now,
+            maxResults=10,
+            singleEvents=True,
+            orderBy="startTime",
+        )
+        .execute()
+    )
     return HttpResponse("success!")
 
 
@@ -56,5 +62,4 @@ def fetch_token(request: HttpRequest) -> HttpResponse:
         "access_token": token_response["access_token"],
         "refresh_token": token_response["refresh_token"],
     }
-
     return HttpResponse(json.dumps(response))
