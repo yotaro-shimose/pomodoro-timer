@@ -4,8 +4,8 @@ import axios, { AxiosResponse } from 'axios';
 import { Token } from '../interfaces/interfaces';
 import { setToken, clearToken } from '../utils/token';
 import { BackendURL } from '../utils/constants';
+import { useRecoilValue } from 'recoil';
 import { isLoggedInState } from '../atoms';
-import { useRecoilState } from 'recoil';
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const isGoogleLoginResponse = (item: any): item is GoogleLoginResponse => item.accessToken !== undefined;
 const onFailure = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => console.log(response);
@@ -14,7 +14,6 @@ const onFailure = (response: GoogleLoginResponse | GoogleLoginResponseOffline) =
 
 const LoginButton: FC = () => {
     const scope = "https://www.googleapis.com/auth/calendar";
-    const [isLoggedIn, setIsLoggedIn] = useRecoilState(isLoggedInState);
     const handleGoogleLogin = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
         if (!isGoogleLoginResponse(response)) {
             axios
@@ -29,7 +28,6 @@ const LoginButton: FC = () => {
                     })
                 .then((res: AxiosResponse<Token>) => {
                     setToken(res.data);
-                    setIsLoggedIn(true);
                 });
         } else {
             console.log("Unexpected Response Type!");
@@ -37,8 +35,8 @@ const LoginButton: FC = () => {
     };
     const onLogoutSuccess = () => {
         clearToken();
-        setIsLoggedIn(false);
     };
+    const isLoggedIn = useRecoilValue(isLoggedInState);
     if (isLoggedIn) {
         return (
             <GoogleLogout

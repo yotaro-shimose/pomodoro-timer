@@ -5,10 +5,8 @@ import { createStyles } from '@material-ui/core/styles';
 import { Task } from '../interfaces/interfaces';
 import SideBar from './SideBar';
 import LoginButton from './LoginButton';
-import CalendarSelection from '../components/CalendarSelection';
 import { calendarIdState, isLoggedInState } from '../atoms';
 import { useRecoilValue } from 'recoil';
-import { getCalendarList } from '../utils/getCalendarList';
 
 const drawerWidth = 240;
 
@@ -40,16 +38,7 @@ const Main: FC = () => {
     const classes = useStyles();
     const calendarId = useRecoilValue(calendarIdState);
     const isLoggedIn = useRecoilValue(isLoggedInState);
-    const ConditionedCalendarSelection: FC = () => {
-        if (calendarId && isLoggedIn) {
-            return;
-        } else {
-            const calendarList = getCalendarList();
-            return (
-                <CalendarSelection />
-            )
-        }
-    }
+
     return (
         <div className={classes.root}>
             <CssBaseline />

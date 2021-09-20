@@ -31,7 +31,7 @@ const calendarListQuery = selector<CalendarList | null>({
         }
         const calendarId = get(calendarIdState);
         if (calendarId) {
-            // ToDo
+            // TODO
             throw 'Not Implemented Error';
         } else {
             return null;
