@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction, useState, createContext, Context } from 'react';
 import './App.css';
 import Main from './components/Main';
-import { Token, GlobalState } from './interfaces/interfaces';
-
+import { GlobalState } from './interfaces/interfaces';
+import { RecoilRoot } from 'recoil';
 
 const dummy_func = (token: GlobalState) => { };
 const dummy_state: GlobalState = { isLoggedIn: false }
@@ -13,9 +13,11 @@ function App() {
   const state: [GlobalState, Dispatch<SetStateAction<GlobalState>>] = useState(dummy_state);
   return (
     <div className="App">
-      <GlobalContext.Provider value={state}>
-        <Main />
-      </GlobalContext.Provider>
+      <RecoilRoot>
+        <GlobalContext.Provider value={state}>
+          <Main />
+        </GlobalContext.Provider>
+      </RecoilRoot>
     </div >
   );
 }

@@ -1,5 +1,6 @@
 interface GlobalState {
     isLoggedIn: boolean,
+    calendarId?: string,
 }
 
 interface Task {
@@ -11,5 +12,14 @@ interface Token {
     refreshToken: string,
 }
 
+interface CalendarInfo {
+    summary: string,
+    id: string,
+};
 
-export type { Task, Token, GlobalState };
+interface CalendarList {
+    items: CalendarInfo[],
+};
+
+
+export type { Task, Token, GlobalState, CalendarList };
