@@ -4,7 +4,7 @@ import { Divider, List, makeStyles, Theme, Toolbar } from '@material-ui/core';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { createStyles } from '@material-ui/core/styles';
-import Task from '../structs/task';
+import { Task } from '../interfaces/interfaces';
 
 interface SideBarProps {
     drawerWidth: number,
