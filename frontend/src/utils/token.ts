@@ -1,10 +1,11 @@
 import { Token } from '../interfaces/interfaces';
-
+import { tokenState, isLoggedInState } from '../atoms';
+import { useRecoilState, useRecoilValue } from 'recoil';
 const TOKEN_KEY = "TOKEN";
-const setToken = (token: Token) => {
+const saveToken = (token: Token) => {
     localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
 };
-const getToken = () => {
+const loadToken: () => Token | null = () => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
         return JSON.parse(token);
@@ -13,4 +14,25 @@ const getToken = () => {
     }
 };
 const clearToken = () => localStorage.removeItem(TOKEN_KEY);
-export { setToken, getToken, clearToken };
+
+const getToken = () => {
+    const isLoggedIn = useRecoilValue(isLoggedInState);
+    const [token, setToken] = useRecoilState(tokenState);
+    if (!isLoggedIn) {
+        const loadedToken = loadToken();
+        if (loadedToken) {
+            setToken(loadedToken);
+            return loadedToken;
+        } else {
+            return null;
+        }
+    } else {
+        return token;
+    }
+}
+
+const setToken = () => {
+
+}
+
+export { saveToken, loadToken, clearToken };
