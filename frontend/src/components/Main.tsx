@@ -5,9 +5,10 @@ import { createStyles } from '@material-ui/core/styles';
 import { Task } from '../interfaces/interfaces';
 import SideBar from './SideBar';
 import LoginButton from './LoginButton';
-import { calendarIdState, isLoggedInState } from '../atoms';
-import { useRecoilValue } from 'recoil';
-
+// import { calendarIdState, isLoggedInState } from '../atoms';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { tokenState } from '../atoms';
+import { TOKEN_KEY } from '../utils/constants';
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -36,8 +37,9 @@ const tasks: Task[] = [{ name: "Task1" }, { name: "Task2" }, { name: "Task3" }, 
 const Main: FC = () => {
     const appTitle = 'PomodoroTimer(仮)';
     const classes = useStyles();
-    const calendarId = useRecoilValue(calendarIdState);
-    const isLoggedIn = useRecoilValue(isLoggedInState);
+    const setToken = useSetRecoilState(tokenState);
+    // const calendarId = useRecoilValue(calendarIdState);
+    // const isLoggedIn = useRecoilValue(isLoggedInState);
 
     return (
         <div className={classes.root}>
