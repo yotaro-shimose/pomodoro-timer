@@ -8,7 +8,6 @@ import LoginButton from './LoginButton';
 // import { calendarIdState, isLoggedInState } from '../atoms';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { tokenState } from '../atoms';
-import { TOKEN_KEY } from '../utils/constants';
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>

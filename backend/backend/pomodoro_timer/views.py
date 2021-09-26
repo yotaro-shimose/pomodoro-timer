@@ -13,6 +13,12 @@ CLIENT_SECRET_PATH = Path(".").joinpath(".google_auth", "client_secret.json")
 CLIENT_ID = "812434553636-nk0sd63psg9h3mjrqorf1jkvugglf7d8.apps.googleusercontent.com"
 CLIENT_SECRET = "x6BHVdY60JkAt_1vyeeqPjpI"
 REDIRECT_URI = "postmessage"
+SCOPES = (
+    [
+        "https://www.googleapis.com/auth/calendar",
+        "https://www.googleapis.com/auth/tasks",
+    ],
+)
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 
 
@@ -48,7 +54,7 @@ def fetch_token(request: HttpRequest) -> HttpResponse:
     code = body["authorizationCode"]
     flow: Flow = Flow.from_client_secrets_file(
         str(CLIENT_SECRET_PATH),
-        scopes=["https://www.googleapis.com/auth/calendar"],
+        scopes=SCOPES,
         redirect_uri=REDIRECT_URI,
     )
     token_response = flow.fetch_token(code=code)
@@ -69,7 +75,7 @@ def list_calendar(request: HttpRequest) -> HttpResponse:
         token_uri="https://oauth2.googleapis.com/token",
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
-        scopes=["https://www.googleapis.com/auth/calendar"],
+        scopes=SCOPES,
         refresh_token=refresh_token,
     )
     if not credentials.valid:
@@ -84,7 +90,8 @@ def list_calendar(request: HttpRequest) -> HttpResponse:
     )
     calendar_list = google_response["items"]
     response = {
-        "items": {"summary": item["summary"], "id": item["id"]}
-        for item in calendar_list
+        "items": [
+            {"summary": item["summary"], "id": item["id"]} for item in calendar_list
+        ]
     }
     return HttpResponse(json.dumps(response))

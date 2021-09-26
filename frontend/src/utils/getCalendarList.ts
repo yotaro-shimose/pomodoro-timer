@@ -1,10 +1,10 @@
-import { useTokenValue } from "./token";
 import { BackendURL } from "./constants";
 import axios, { AxiosResponse } from "axios";
 import { CalendarList } from "../interfaces/interfaces";
-
+import { useRecoilValue } from 'recoil';
+import { tokenState } from "../atoms";
 const getCalendarList = async () => {
-    const token = useTokenValue();
+    const token = useRecoilValue(tokenState);
     if (token != null) {
         const calendarList = await axios
             .post(`${BackendURL}/list_calendar`,

@@ -13,7 +13,7 @@ const onFailure = (response: GoogleLoginResponse | GoogleLoginResponseOffline) =
 
 
 const LoginButton: FC = () => {
-    const scope = "https://www.googleapis.com/auth/calendar";
+    const scope = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/tasks";
     const setToken = useSetRecoilState(tokenState);
     const handleGoogleLogin = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
         if (!isGoogleLoginResponse(response)) {
