@@ -5,11 +5,9 @@ import { createStyles } from '@material-ui/core/styles';
 import { Task } from '../interfaces/interfaces';
 import SideBar from './SideBar';
 import LoginButton from './LoginButton';
-import CalendarSelection from '../components/CalendarSelection';
-import { calendarIdState, isLoggedInState } from '../atoms';
-import { useRecoilValue } from 'recoil';
-import { getCalendarList } from '../utils/getCalendarList';
-
+// import { calendarIdState, isLoggedInState } from '../atoms';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { tokenState } from '../atoms';
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -38,18 +36,10 @@ const tasks: Task[] = [{ name: "Task1" }, { name: "Task2" }, { name: "Task3" }, 
 const Main: FC = () => {
     const appTitle = 'PomodoroTimer(仮)';
     const classes = useStyles();
-    const calendarId = useRecoilValue(calendarIdState);
-    const isLoggedIn = useRecoilValue(isLoggedInState);
-    const ConditionedCalendarSelection: FC = () => {
-        if (calendarId && isLoggedIn) {
-            return;
-        } else {
-            const calendarList = getCalendarList();
-            return (
-                <CalendarSelection />
-            )
-        }
-    }
+    const setToken = useSetRecoilState(tokenState);
+    // const calendarId = useRecoilValue(calendarIdState);
+    // const isLoggedIn = useRecoilValue(isLoggedInState);
+
     return (
         <div className={classes.root}>
             <CssBaseline />

@@ -1,9 +1,15 @@
 import { atom, selector } from 'recoil';
 import { CalendarList } from "./interfaces/interfaces";
 import { Token } from './interfaces/interfaces';
+import { recoilPersist } from "recoil-persist";
+
+const { persistAtom } = recoilPersist();
+
+
 const tokenState = atom<Token | null>({
     key: 'token',
     default: null,
+    effects_UNSTABLE: [persistAtom],
 })
 
 
@@ -31,7 +37,7 @@ const calendarListQuery = selector<CalendarList | null>({
         }
         const calendarId = get(calendarIdState);
         if (calendarId) {
-            // ToDo
+            // TODO
             throw 'Not Implemented Error';
         } else {
             return null;

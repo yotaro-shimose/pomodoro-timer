@@ -1,8 +1,3 @@
-interface GlobalState {
-    isLoggedIn: boolean,
-    calendarId?: string,
-}
-
 interface Task {
     name: string,
 };
@@ -22,4 +17,4 @@ interface CalendarList {
 };
 
 
-export type { Task, Token, GlobalState, CalendarList };
+export type { Task, Token, CalendarList };
