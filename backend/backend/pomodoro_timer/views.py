@@ -28,40 +28,32 @@ def parse_body(body: bytes) -> dict[str, str]:
 
 def get_task(request: HttpRequest) -> HttpResponse:
     access_token = request.META["access_token"]
+    # access_token = "ya29.a0ARrdaM8mfGsHFVX4neeo4DDPrJH5Xf4YtGw-dedYcFiuviU7O28QWDoKf6_m9HM0M-XutkeKRkLMNfvB5O0XA8KJ0YzNiNJELyNAvznie5MSGKj7l__WZ2WeNeK4FPJ3Fe4P9hYemCE2_QhRVQe4-c7nG4AB"
     refresh_token = request.META["refresh_token"]
+    # refresh_token = "1//0e-ZbTmOOtRJ7CgYIARAAGA4SNwF-L9IrqMqXDU0T3nNKjJ8uJX5cBnAgeiEt4ioU9Lrdt1wMynFCzoTQBbkRiy3H3DQv7z9ul2Y"
     credentials = Credentials(
         token=access_token,
         refresh_token=refresh_token,
         token_uri="https://oauth2.googleapis.com/token",
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
-        scopes=["https://www.googleapis.com/auth/calendar"],
+        scopes=SCOPES,
     )
-    credentials.refresh(Request())
+    if not credentials.valid:
+        credentials.refresh(Request())
 
-    now = datetime.datetime.utcnow().isoformat() + "Z"
-    service = build("calendar", "v3", credentials=credentials)
-    res = (
-        service.events()
-        .list(
-            calendarId="primary",
-            timeMin=now,
-            maxResults=10,
-            singleEvents=True,
-            orderBy="startTime",
-        )
-        .execute()
-    )
-    return HttpResponse("success!")
+    service = build("tasks", "v1", credentials=credentials)
+    results = service.tasklists().list().execute()
+    items = results.get("items", [])
+    task_list = [{"id": item["id"], "name": item["title"]} for item in items]
+    return HttpResponse(json.dumps(task_list, ensure_ascii=False))
 
 
 def fetch_token(request: HttpRequest) -> HttpResponse:
     body = parse_body(request.body)
     code = body["authorizationCode"]
     flow: Flow = Flow.from_client_secrets_file(
-        str(CLIENT_SECRET_PATH),
-        scopes=SCOPES,
-        redirect_uri=REDIRECT_URI,
+        str(CLIENT_SECRET_PATH), scopes=SCOPES, redirect_uri=REDIRECT_URI,
     )
     token_response = flow.fetch_token(code=code)
     response = {
@@ -86,13 +78,7 @@ def list_calendar(request: HttpRequest) -> HttpResponse:
     if not credentials.valid:
         credentials.refresh(Request())
     service = build("calendar", "v3", credentials=credentials)
-    google_response = (
-        service.calendarList()
-        .list(
-            showHidden=True,
-        )
-        .execute()
-    )
+    google_response = service.calendarList().list(showHidden=True,).execute()
     calendar_list = google_response["items"]
     response = {
         "items": [
