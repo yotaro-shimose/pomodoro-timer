@@ -28,9 +28,7 @@ def parse_body(body: bytes) -> dict[str, str]:
 
 def get_task(request: HttpRequest) -> HttpResponse:
     access_token = request.META["access_token"]
-    # access_token = "ya29.a0ARrdaM8mfGsHFVX4neeo4DDPrJH5Xf4YtGw-dedYcFiuviU7O28QWDoKf6_m9HM0M-XutkeKRkLMNfvB5O0XA8KJ0YzNiNJELyNAvznie5MSGKj7l__WZ2WeNeK4FPJ3Fe4P9hYemCE2_QhRVQe4-c7nG4AB"
     refresh_token = request.META["refresh_token"]
-    # refresh_token = "1//0e-ZbTmOOtRJ7CgYIARAAGA4SNwF-L9IrqMqXDU0T3nNKjJ8uJX5cBnAgeiEt4ioU9Lrdt1wMynFCzoTQBbkRiy3H3DQv7z9ul2Y"
     credentials = Credentials(
         token=access_token,
         refresh_token=refresh_token,
