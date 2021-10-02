@@ -13,12 +13,10 @@ CLIENT_SECRET_PATH = Path(".").joinpath(".google_auth", "client_secret.json")
 CLIENT_ID = "812434553636-nk0sd63psg9h3mjrqorf1jkvugglf7d8.apps.googleusercontent.com"
 CLIENT_SECRET = "x6BHVdY60JkAt_1vyeeqPjpI"
 REDIRECT_URI = "postmessage"
-SCOPES = (
-    [
-        "https://www.googleapis.com/auth/calendar",
-        "https://www.googleapis.com/auth/tasks",
-    ],
-)
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/tasks",
+]
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 
 
