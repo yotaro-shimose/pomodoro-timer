@@ -1,26 +1,24 @@
 import { FC } from 'react';
 import { GoogleLogin, GoogleLoginResponse, GoogleLoginResponseOffline, GoogleLogout } from 'react-google-login';
 import axios, { AxiosResponse } from 'axios';
-import { GlobalState, Token } from '../interfaces/interfaces';
-import { setToken, clearToken } from '../utils/token';
-import lodash from 'lodash';
-
-const backendURL = "http://localhost:8000";
+import { Token } from '../interfaces/interfaces';
+import { tokenState } from '../atoms';
+import { BackendURL } from '../utils/constants';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { isLoggedInState } from '../atoms';
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const isGoogleLoginResponse = (item: any): item is GoogleLoginResponse => item.accessToken !== undefined;
 const onFailure = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => console.log(response);
 
-interface LoginButtonProps {
-    state: GlobalState,
-    setState: (state: GlobalState) => void,
-};
 
-const LoginButton: FC<LoginButtonProps> = (props: LoginButtonProps) => {
-    const scope = "https://www.googleapis.com/auth/calendar";
+
+const LoginButton: FC = () => {
+    const scope = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/tasks";
+    const setToken = useSetRecoilState(tokenState);
     const handleGoogleLogin = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
         if (!isGoogleLoginResponse(response)) {
             axios
-                .post(`${backendURL}/fetch_token`,
+                .post(`${BackendURL}/fetch_token`,
                     {
                         authorizationCode: response.code
                     },
@@ -31,21 +29,16 @@ const LoginButton: FC<LoginButtonProps> = (props: LoginButtonProps) => {
                     })
                 .then((res: AxiosResponse<Token>) => {
                     setToken(res.data);
-                    let state: GlobalState = lodash.cloneDeep(props.state);
-                    state.isLoggedIn = true;
-                    props.setState(state);
                 });
         } else {
             console.log("Unexpected Response Type!");
         }
     };
     const onLogoutSuccess = () => {
-        clearToken();
-        let state: GlobalState = lodash.cloneDeep(props.state);
-        state.isLoggedIn = false;
-        props.setState(state);
+        setToken(null);
     };
-    if (props.state.isLoggedIn) {
+    const isLoggedIn = useRecoilValue(isLoggedInState);
+    if (isLoggedIn) {
         return (
             <GoogleLogout
                 clientId={googleClientId}

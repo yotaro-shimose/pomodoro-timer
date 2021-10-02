@@ -10,7 +10,6 @@
     "@types/react": "^17.0.20",
     "@types/react-dom": "^17.0.9",
     "axios": "^0.21.4",
-    "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
@@ -26,7 +25,8 @@
   "eslintConfig": {
     "extends": [
       "react-app",
-      "react-app/jest"
+      "react-app/jest",
+      "plugin:react-hooks/recommended"
     ]
   },
   "browserslist": {
@@ -43,9 +43,12 @@
   },
   "devDependencies": {
     "@material-ui/core": "^4.12.3",
-    "@types/lodash": "^4.14.173",
     "@types/node": "^16.9.1",
+    "@types/recoil": "^0.0.9",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "react-google-login": "^5.2.2",
-    "react-timer-hook": "^3.0.4"
+    "react-timer-hook": "^3.0.4",
+    "recoil": "^0.4.1",
+    "recoil-persist": "^3.0.0"
   }
 }

@@ -13,6 +13,10 @@ CLIENT_SECRET_PATH = Path(".").joinpath(".google_auth", "client_secret.json")
 CLIENT_ID = "812434553636-nk0sd63psg9h3mjrqorf1jkvugglf7d8.apps.googleusercontent.com"
 CLIENT_SECRET = "x6BHVdY60JkAt_1vyeeqPjpI"
 REDIRECT_URI = "postmessage"
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/tasks",
+]
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 
 
@@ -21,40 +25,60 @@ def parse_body(body: bytes) -> dict[str, str]:
 
 
 def get_task(request: HttpRequest) -> HttpResponse:
-    access_token = request.GET["access_token"]
+    access_token = request.META["access_token"]
+    refresh_token = request.META["refresh_token"]
     credentials = Credentials(
-        access_token,
+        token=access_token,
+        refresh_token=refresh_token,
         token_uri="https://oauth2.googleapis.com/token",
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
-        scopes=["https://www.googleapis.com/auth/calendar"],
+        scopes=SCOPES,
     )
-    credentials.refresh(Request())
+    if not credentials.valid:
+        credentials.refresh(Request())
 
-    now = datetime.datetime.utcnow().isoformat() + "Z"
-    service = build("calendar", "v3", credentials=credentials)
-    service.events().list(
-        calendarId="primary",
-        timeMin=now,
-        maxResults=10,
-        singleEvents=True,
-        orderBy="startTime",
-    ).execute()
-    return HttpResponse("success!")
+    service = build("tasks", "v1", credentials=credentials)
+    results = service.tasklists().list().execute()
+    items = results.get("items", [])
+    task_list = [{"id": item["id"], "name": item["title"]} for item in items]
+    return HttpResponse(json.dumps(task_list, ensure_ascii=False))
 
 
 def fetch_token(request: HttpRequest) -> HttpResponse:
     body = parse_body(request.body)
     code = body["authorizationCode"]
     flow: Flow = Flow.from_client_secrets_file(
-        str(CLIENT_SECRET_PATH),
-        scopes=["https://www.googleapis.com/auth/calendar"],
-        redirect_uri=REDIRECT_URI,
+        str(CLIENT_SECRET_PATH), scopes=SCOPES, redirect_uri=REDIRECT_URI,
     )
     token_response = flow.fetch_token(code=code)
     response = {
-        "access_token": token_response["access_token"],
-        "refresh_token": token_response["refresh_token"],
+        "accessToken": token_response["access_token"],
+        "refreshToken": token_response["refresh_token"],
     }
+    return HttpResponse(json.dumps(response))
 
+
+def list_calendar(request: HttpRequest) -> HttpResponse:
+    body = parse_body(request.body)
+    access_token = body["accessToken"]
+    refresh_token = body["refreshToken"]
+    credentials = Credentials(
+        access_token,
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        scopes=SCOPES,
+        refresh_token=refresh_token,
+    )
+    if not credentials.valid:
+        credentials.refresh(Request())
+    service = build("calendar", "v3", credentials=credentials)
+    google_response = service.calendarList().list(showHidden=True,).execute()
+    calendar_list = google_response["items"]
+    response = {
+        "items": [
+            {"summary": item["summary"], "id": item["id"]} for item in calendar_list
+        ]
+    }
     return HttpResponse(json.dumps(response))
