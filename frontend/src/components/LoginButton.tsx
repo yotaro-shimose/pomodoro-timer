@@ -6,7 +6,6 @@ import { useRecoilValue } from 'recoil';
 import { isLoggedInState } from '../atoms';
 
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-const isGoogleLoginResponse = (item: any): item is GoogleLoginResponse => item.accessToken !== undefined;
 const onFailure = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => console.log(response);
 
 
@@ -18,23 +17,19 @@ const LoginButton: FC<LoginButtonProps> = (props) => {
     const scope = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/tasks";
     const setUserId = props.setUserId;
     const handleGoogleLogin = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
-        if (!isGoogleLoginResponse(response)) {
-            axios
-                .post(`${BackendURL}/fetch_token`,
-                    {
-                        authorizationCode: response.code
-                    },
-                    {
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        }
-                    })
-                .then((res: AxiosResponse<string>) => {
-                    setUserId(res.data);
-                });
-        } else {
-            console.log("Unexpected Response Type!");
-        }
+        axios
+            .post(`${BackendURL}/fetch_token`,
+                {
+                    authorizationCode: response.code
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+            .then((res: AxiosResponse<string>) => {
+                setUserId(res.data);
+            });
     };
     const onLogoutSuccess = () => {
         setUserId('');
