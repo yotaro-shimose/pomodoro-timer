@@ -1,4 +1,5 @@
 import json
+import re
 from django.http import HttpResponse
 from django.http.request import HttpRequest
 from google.oauth2.credentials import Credentials
@@ -8,6 +9,7 @@ from google_auth_oauthlib.flow import Flow
 from pathlib import Path
 import os
 from pomodoro_timer.models import User
+import hashlib
 
 CLIENT_SECRET_PATH = Path(".").joinpath(".google_auth", "client_secret.json")
 CLIENT_ID = "812434553636-nk0sd63psg9h3mjrqorf1jkvugglf7d8.apps.googleusercontent.com"
@@ -45,20 +47,6 @@ def get_task(request: HttpRequest) -> HttpResponse:
     return HttpResponse(json.dumps(task_list, ensure_ascii=False))
 
 
-def fetch_token(request: HttpRequest) -> HttpResponse:
-    body = parse_body(request.body)
-    code = body["authorizationCode"]
-    flow: Flow = Flow.from_client_secrets_file(
-        str(CLIENT_SECRET_PATH), scopes=SCOPES, redirect_uri=REDIRECT_URI,
-    )
-    token_response = flow.fetch_token(code=code)
-    response = {
-        "accessToken": token_response["access_token"],
-        "refreshToken": token_response["refresh_token"],
-    }
-    return HttpResponse(json.dumps(response))
-
-
 def list_calendar(request: HttpRequest) -> HttpResponse:
     body = parse_body(request.body)
     access_token = body["accessToken"]
@@ -84,16 +72,62 @@ def list_calendar(request: HttpRequest) -> HttpResponse:
     return HttpResponse(json.dumps(response))
 
 
-def register_user(request: HttpRequest) -> HttpResponse:
+def _create_hash_data(gmail_address: str) -> str:
+    return hashlib.sha256(gmail_address.encode("utf-8")).hexdigest()
+
+
+def _register_user(request: HttpRequest) -> HttpResponse:
+    # body = parse_body(request.body)
+    # code = body["authorizationCode"]
+    code = "4/0AX4XfWhq8Nwzgb8o2akmRmtQKYrcXKP4zwiruFs8o0rbzFU3GnTm1Ov8Cs3pci56QA-VVw"
+    flow: Flow = Flow.from_client_secrets_file(
+        str(CLIENT_SECRET_PATH), scopes=SCOPES, redirect_uri=REDIRECT_URI,
+    )
+    token_response = flow.fetch_token(code=code)
+    response = {
+        "accessToken": token_response["access_token"],
+        "refreshToken": token_response["refresh_token"],
+    }
+    credentials = Credentials(
+        token=token_response["access_token"],
+        refresh_token=token_response["refresh_token"],
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        scopes=SCOPES,
+    )
+    service = build("people", "v1", credentials=credentials)
+    gmail_address = (
+        service.people()
+        .get(resourceName="people/me", personFields="emailAddresses")
+        .execute()
+    ).get("emailAddresses")[0]["value"]
+    id = _create_hash_data(gmail_address)
+    user = User(
+        id=id,
+        access_token=token_response["access_token"],
+        refresh_token=token_response["refresh_token"],
+    )
+    User.save(user)
+    # TODO レスポンス作成
+
+def _update_user(request: HttpRequest) -> HttpResponse:
     raise NotImplementedError()
 
 
-def update_user(request: HttpRequest) -> HttpResponse:
-    raise NotImplementedError()
+def collect_user(request: HttpRequest) -> HttpResponse:
+    http_method = request["method"]
+    if http_method == "POST":
+        return _register_user(request)
+    elif http_method == "PUT":
+        return _update_user(request)
+    else:
+        return
 
 
-def get_user(request: HttpRequest) -> HttpResponse:
-    raise NotImplementedError()
+def get_user(request: HttpRequest, id: str) -> HttpResponse:
+    user = User.objects.get(id=id)
+    return HttpResponse(json.dumps(user))
 
 
 def get_task_list(request: HttpRequest) -> HttpResponse:
