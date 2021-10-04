@@ -1,20 +1,22 @@
 import { FC } from 'react';
 import { GoogleLogin, GoogleLoginResponse, GoogleLoginResponseOffline, GoogleLogout } from 'react-google-login';
 import axios, { AxiosResponse } from 'axios';
-import { Token } from '../interfaces/interfaces';
-import { tokenState } from '../atoms';
-import { BackendURL } from '../utils/constants';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { BackendURL } from '../constants';
+import { useRecoilValue } from 'recoil';
 import { isLoggedInState } from '../atoms';
+
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const isGoogleLoginResponse = (item: any): item is GoogleLoginResponse => item.accessToken !== undefined;
 const onFailure = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => console.log(response);
 
 
+interface LoginButtonProps {
+    setUserId: (userId: string) => void;
+}
 
-const LoginButton: FC = () => {
+const LoginButton: FC<LoginButtonProps> = (props) => {
     const scope = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/tasks";
-    const setToken = useSetRecoilState(tokenState);
+    const setUserId = props.setUserId;
     const handleGoogleLogin = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
         if (!isGoogleLoginResponse(response)) {
             axios
@@ -27,15 +29,15 @@ const LoginButton: FC = () => {
                             'Content-Type': 'application/x-www-form-urlencoded'
                         }
                     })
-                .then((res: AxiosResponse<Token>) => {
-                    setToken(res.data);
+                .then((res: AxiosResponse<string>) => {
+                    setUserId(res.data);
                 });
         } else {
             console.log("Unexpected Response Type!");
         }
     };
     const onLogoutSuccess = () => {
-        setToken(null);
+        setUserId('');
     };
     const isLoggedIn = useRecoilValue(isLoggedInState);
     if (isLoggedIn) {
