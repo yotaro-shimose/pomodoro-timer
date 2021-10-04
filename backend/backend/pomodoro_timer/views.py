@@ -3,11 +3,11 @@ from django.http import HttpResponse
 from django.http.request import HttpRequest
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-import datetime
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import Flow
 from pathlib import Path
 import os
+from pomodoro_timer.models import User
 
 CLIENT_SECRET_PATH = Path(".").joinpath(".google_auth", "client_secret.json")
 CLIENT_ID = "812434553636-nk0sd63psg9h3mjrqorf1jkvugglf7d8.apps.googleusercontent.com"
@@ -82,3 +82,27 @@ def list_calendar(request: HttpRequest) -> HttpResponse:
         ]
     }
     return HttpResponse(json.dumps(response))
+
+
+def register_user(request: HttpRequest) -> HttpResponse:
+    raise NotImplementedError()
+
+
+def update_user(request: HttpRequest) -> HttpResponse:
+    raise NotImplementedError()
+
+
+def get_user(request: HttpRequest) -> HttpResponse:
+    raise NotImplementedError()
+
+
+def get_task_list(request: HttpRequest) -> HttpResponse:
+    raise NotImplementedError()
+
+
+def get_task(request: HttpRequest) -> HttpResponse:
+    raise NotImplementedError()
+
+
+def get_calender(request: HttpRequest) -> HttpResponse:
+    raise NotImplementedError()

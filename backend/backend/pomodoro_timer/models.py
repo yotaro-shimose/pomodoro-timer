@@ -1,6 +1,9 @@
 from django.db import models
 
 # Create your models here.
-class Task:
-    name = models.CharField(max_length=32)
-
+class User(models.Model):
+    id = models.CharField(max_length=255, primary_key=True)
+    access_token = models.CharField(max_length=255)
+    refresh_token = models.CharField(max_length=255)
+    calender_id = models.CharField(max_length=255)
+    task_list_id = models.CharField(max_length=255)

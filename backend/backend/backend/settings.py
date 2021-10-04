@@ -77,38 +77,12 @@ TEMPLATES = [
         },
     },
 ]
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
-        "drf_social_oauth2.authentication.SocialAuthentication",
-    ),
-}
 AUTHENTICATION_BACKENDS = (
-    "drf_social_oauth2.backends.DjangoOAuth2",
     "django.contrib.auth.backends.ModelBackend",
 )
 WSGI_APPLICATION = "backend.wsgi.application"
 
-AUTHENTICATION_BACKENDS = (
-    # Google OAuth2
-    "social_core.backends.google.GoogleOAuth2",
-    # drf-social-oauth2
-    "drf_social_oauth2.backends.DjangoOAuth2",
-    # Django
-    "django.contrib.auth.backends.ModelBackend",
-)
 
-# Google configuration
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = (
-    "812434553636-nk0sd63psg9h3mjrqorf1jkvugglf7d8.apps.googleusercontent.com"
-)
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = "x6BHVdY60JkAt_1vyeeqPjpI"
-
-# Define SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE to get extra permissions from Google.
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
-    "https://www.googleapis.com/auth/userinfo.email",
-    "https://www.googleapis.com/auth/userinfo.profile",
-]
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
