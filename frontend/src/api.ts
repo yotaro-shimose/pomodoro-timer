@@ -1,12 +1,17 @@
 import { Task, TaskList, Calendar, UserProfile } from "./interfaces";
-
-export const fetchTask: () => Promise<Task[]> = async () => {
-  return [
-    { id: "t1", name: "Task1" },
-    { id: "t2", name: "Task2" },
-    { id: "t3", name: "Task3" },
-    { id: "t4", name: "Task4" },
-  ];
+import axios, { AxiosResponse } from "axios";
+import { BackendURL } from "./constants";
+export const fetchTask: (id: string) => Promise<Task[]> = async (id: string) => {
+  const taskList = await axios.get(`${BackendURL}/login`, {
+    headers: {
+      "Content-Type": "application/json",
+      "id": id
+    },
+  })
+    .then((res: AxiosResponse<Task[]>) => {
+      return res.data
+    });
+  return taskList
 };
 
 export const fetchTaskList: () => Promise<TaskList[]> = async () => {

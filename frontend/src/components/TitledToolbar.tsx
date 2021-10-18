@@ -2,12 +2,13 @@ import { FC } from 'react';
 import { makeStyles, Theme, Toolbar, Typography, AppBar } from '@material-ui/core';
 import { createStyles } from '@material-ui/core/styles';
 import LoginButton from './LoginButton';
+import { UserProfile } from '../interfaces';
 
 
 interface TitledToolbarProps {
     appTitle: string,
     drawerWidth: number,
-    setUserId: (userId: string) => void,
+    setUserProfile: (userProfile: UserProfile) => void,
 };
 
 const TitledToolbar: FC<TitledToolbarProps> = (props) => {
@@ -32,7 +33,7 @@ const TitledToolbar: FC<TitledToolbarProps> = (props) => {
                     {appTitle}
                 </Typography>
                 <div className={classes.barRight} />
-                <LoginButton setUserId={props.setUserId} />
+                <LoginButton setUserProfile={props.setUserProfile} />
             </Toolbar>
         </AppBar>
     )

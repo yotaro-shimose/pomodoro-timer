@@ -17,7 +17,7 @@ import { Task, APIError } from "../interfaces";
 
 // State
 import { atom, useRecoilState, useSetRecoilState } from "recoil";
-import { userIdState } from "../atoms";
+import { userProfileState } from "../atoms";
 
 // API
 import { fetchTask } from "../api";
@@ -50,7 +50,7 @@ const needConfigState = atom<boolean>({
 const Main: FC = () => {
   const appTitle = "PomodoroTimer(仮)";
   const classes = useStyles();
-  const setUserId = useSetRecoilState(userIdState);
+  const setUserProfile = useSetRecoilState(userProfileState);
   const [taskList, setTaskList] = useRecoilState(taskListState);
   const [needConfig, setNeedConfig] = useRecoilState(needConfigState);
 
@@ -84,7 +84,7 @@ const Main: FC = () => {
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <TitledToolbar appTitle={appTitle} drawerWidth={drawerWidth} setUserId={setUserId} />
+      <TitledToolbar appTitle={appTitle} drawerWidth={drawerWidth} setUserProfile={setUserProfile} />
       {sideBar}
       <main className={classes.content}>
         <Toolbar />

@@ -12,7 +12,7 @@ import Button from "@material-ui/core/Button";
 import { atom } from "recoil";
 import { TaskList, Calendar, Config as UserConfig, UserProfile } from "../interfaces";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { userIdState } from "../atoms";
+import { userProfileState } from "../atoms";
 
 // axios
 import axios from "axios";
@@ -62,13 +62,13 @@ const ConfigScreen: FC = () => {
   const [taskListList, setTaskListList] = useRecoilState(taskListListState);
   const [calendarList, setCalendarList] = useRecoilState(calendarListState);
   const [state, setState] = useRecoilState(configState);
-  const userId = useRecoilValue(userIdState);
+  const userProfile = useRecoilValue(userProfileState);
   const sendConfig = async (config: UserConfig) => {
     axios
-      .post<boolean>(`${BackendURL}/config`, config, {
+      .put<boolean>(`${BackendURL}/user`, config, {
         headers: {
-          "Content-Type": "x-www-form-urlencoded",
-          userId: userId,
+          "Content-Type": "application/json",
+          // userId: userProfile.id,
         },
       })
       .then(() => {

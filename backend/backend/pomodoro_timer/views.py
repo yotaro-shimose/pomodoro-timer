@@ -76,18 +76,68 @@ def _create_hash_data(gmail_address: str) -> str:
     return hashlib.sha256(gmail_address.encode("utf-8")).hexdigest()
 
 
-def _register_user(request: HttpRequest) -> HttpResponse:
-    # body = parse_body(request.body)
-    # code = body["authorizationCode"]
-    code = "4/0AX4XfWhq8Nwzgb8o2akmRmtQKYrcXKP4zwiruFs8o0rbzFU3GnTm1Ov8Cs3pci56QA-VVw"
+def login(request: HttpRequest) -> HttpResponse:
+    body = parse_body(request.body)
+    code = body["authorizationCode"]
+    # code = "4/0AX4XfWhq8Nwzgb8o2akmRmtQKYrcXKP4zwiruFs8o0rbzFU3GnTm1Ov8Cs3pci56QA-VVw"
     flow: Flow = Flow.from_client_secrets_file(
         str(CLIENT_SECRET_PATH), scopes=SCOPES, redirect_uri=REDIRECT_URI,
     )
     token_response = flow.fetch_token(code=code)
-    response = {
-        "accessToken": token_response["access_token"],
-        "refreshToken": token_response["refresh_token"],
-    }
+
+    credentials = Credentials(
+        token=token_response["access_token"],
+        refresh_token=token_response["refresh_token"],
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        scopes=SCOPES,
+    )
+    service = build("people", "v1", credentials=credentials)
+    gmail_address = (
+        service.people()
+        .get(resourceName="people/me", personFields="emailAddresses")
+        .execute()
+    ).get("emailAddresses")[0]["value"]
+
+    id = _create_hash_data(gmail_address)
+
+    exists_user = User.objects.filter(id=id).count() == 1
+    if exists_user:
+        user = User.objects.get(id=id)
+    else:
+        user = User(
+            id=id,
+            access_token=token_response["access_token"],
+            refresh_token=token_response["refresh_token"],
+        )
+        User.save(user)
+    return HttpResponse(
+        json.dumps(
+            {
+                "id": user.id,
+                "calenderId": user.calender_id,
+                "taskListId": user.task_list_id,
+            },
+            ensure_ascii=False,
+        )
+    )
+
+
+def _get_user(request: HttpRequest) -> HttpResponse:
+    body = parse_body(request.body)
+    code = body["authorizationCode"]
+
+
+def _register_user(request: HttpRequest) -> HttpResponse:
+    body = parse_body(request.body)
+    code = body["authorizationCode"]
+    # code = "4/0AX4XfWhq8Nwzgb8o2akmRmtQKYrcXKP4zwiruFs8o0rbzFU3GnTm1Ov8Cs3pci56QA-VVw"
+    flow: Flow = Flow.from_client_secrets_file(
+        str(CLIENT_SECRET_PATH), scopes=SCOPES, redirect_uri=REDIRECT_URI,
+    )
+    token_response = flow.fetch_token(code=code)
+
     credentials = Credentials(
         token=token_response["access_token"],
         refresh_token=token_response["refresh_token"],
@@ -109,14 +159,19 @@ def _register_user(request: HttpRequest) -> HttpResponse:
         refresh_token=token_response["refresh_token"],
     )
     User.save(user)
-    # TODO レスポンス作成
+    return HttpResponse(
+        json.dumps({"id": user.id, "task": None,}, ensure_ascii=False, indent=2)
+    )
+
 
 def _update_user(request: HttpRequest) -> HttpResponse:
     raise NotImplementedError()
 
 
 def collect_user(request: HttpRequest) -> HttpResponse:
-    http_method = request["method"]
+    http_method = request.method
+    if http_method == "GET":
+        return _get_user(request)
     if http_method == "POST":
         return _register_user(request)
     elif http_method == "PUT":

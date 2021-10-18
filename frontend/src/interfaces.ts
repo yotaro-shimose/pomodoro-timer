@@ -39,3 +39,7 @@ export interface Timer {
   start: number;
   end: number;
 }
+
+export interface UserId {
+  id: string
+}

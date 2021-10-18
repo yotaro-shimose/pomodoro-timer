@@ -1,19 +1,19 @@
 import { atom, selector } from "recoil";
 import { recoilPersist } from "recoil-persist";
-import { Task, Timer } from "./interfaces";
+import { Task, Timer, UserProfile } from "./interfaces";
 
 const { persistAtom } = recoilPersist();
 
-export const userIdState = atom<string>({
+export const userProfileState = atom<UserProfile>({
   key: "userId",
-  default: "",
+  default: { "id": "", "calendarId": "", "taskListId": "" },
   effects_UNSTABLE: [persistAtom],
 });
 
 export const isLoggedInState = selector<boolean>({
   key: "isLoggedIn",
   get: ({ get }) => {
-    if (get(userIdState)) {
+    if (get(userProfileState).id) {
       return true;
     } else {
       return false;
