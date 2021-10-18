@@ -1,9 +1,9 @@
 // React
-import { FC } from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { FC, useEffect } from "react";
+import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 
 // Material UI
-import { makeStyles, Theme, Toolbar } from "@material-ui/core";
+import { makeStyles, Theme, Toolbar, Typography } from "@material-ui/core";
 import { CssBaseline } from "@material-ui/core";
 import { createStyles } from "@material-ui/core/styles";
 
@@ -13,11 +13,15 @@ import ConfigScreen from "./ConfigScreen";
 import TitledToolbar from "./TitledToolbar";
 
 // interfaces
-import { Task, TaskList, Calendar } from "../interfaces";
+import { Task, APIError } from "../interfaces";
 
 // State
-import { useSetRecoilState } from "recoil";
+import { atom, useRecoilState, useSetRecoilState } from "recoil";
 import { userIdState } from "../atoms";
+
+// API
+import { fetchTask } from "../api";
+import { STATUS } from "../constants";
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -32,62 +36,65 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const tasks: Task[] = [{ name: "Task1" }, { name: "Task2" }, { name: "Task3" }, { name: "Task4" }];
-const taskListList: TaskList[] = [
-  {
-    summary: "MyTaskList1",
-    id: "id1",
-  },
-  {
-    summary: "MyTaskList2",
-    id: "id2",
-  },
-  {
-    summary: "MyTaskList3",
-    id: "id3",
-  },
-];
-const calendarList: Calendar[] = [
-  {
-    summary: "MyCalendar1",
-    id: "cid1",
-  },
-  {
-    summary: "MyCalendar2",
-    id: "cid2",
-  },
-  {
-    summary: "MyCalendar3",
-    id: "cid3",
-  },
-  {
-    summary: "MyCalendar4",
-    id: "cid4",
-  },
-];
-const calendarId = "";
-const taskListId = "id3";
+// State Definition
+const taskListState = atom<Task[] | null>({
+  key: "task",
+  default: [],
+});
+
+const needConfigState = atom<boolean>({
+  key: "needConfig",
+  default: false,
+});
+
 const Main: FC = () => {
   const appTitle = "PomodoroTimer(仮)";
   const classes = useStyles();
   const setUserId = useSetRecoilState(userIdState);
+  const [taskList, setTaskList] = useRecoilState(taskListState);
+  const [needConfig, setNeedConfig] = useRecoilState(needConfigState);
+
+  useEffect(() => {
+    fetchTask()
+      .then((taskList: Task[]) => {
+        setTaskList(taskList);
+      })
+      .catch((error: APIError) => {
+        if (error.status === STATUS.ConfigNotCompleted) {
+          setNeedConfig(true);
+        }
+      });
+  });
+
+  let sideBar;
+  if (taskList) {
+    sideBar = <SideBar drawerWidth={drawerWidth} tasks={taskList} />;
+  } else {
+    sideBar = <></>;
+  }
+
+  let MainContent: FC = () => {
+    return (
+      <Typography>
+        <h3>This is a main content</h3>
+      </Typography>
+    );
+  };
 
   return (
     <div className={classes.root}>
       <CssBaseline />
       <TitledToolbar appTitle={appTitle} drawerWidth={drawerWidth} setUserId={setUserId} />
-      <SideBar drawerWidth={drawerWidth} tasks={tasks} />
-
+      {sideBar}
       <main className={classes.content}>
         <Toolbar />
         <Router>
+          <Route
+            path="/"
+            render={() => (needConfig ? <Redirect to="/config" /> : <MainContent />)}
+          />
           <Route exact path="/config">
-            <ConfigScreen
-              taskListList={taskListList}
-              calendarList={calendarList}
-              taskListId={taskListId}
-              calendarId={calendarId}
-            />
+            <ConfigScreen />
           </Route>
         </Router>
         {/* <TimerScreen name={taskName} duration={10} onDone={onDone} /> */}

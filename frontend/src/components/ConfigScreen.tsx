@@ -10,7 +10,7 @@ import Button from "@material-ui/core/Button";
 
 // State
 import { atom } from "recoil";
-import { TaskList, Calendar, Config as UserConfig } from "../interfaces";
+import { TaskList, Calendar, Config as UserConfig, UserProfile } from "../interfaces";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userIdState } from "../atoms";
 
@@ -21,12 +21,18 @@ import axios from "axios";
 import { BackendURL } from "../constants";
 import MsgScreen from "./MsgScreen";
 
-interface ConfigProps {
-  taskListList: TaskList[];
-  calendarList: Calendar[];
-  taskListId: string;
-  calendarId: string;
-}
+// API
+import { fetchTaskList, fetchCalendar, fetchUserProfile } from "../api";
+
+const taskListListState = atom<TaskList[]>({
+  key: "taskList",
+  default: [],
+});
+
+const calendarListState = atom<Calendar[]>({
+  key: "calendar",
+  default: [],
+});
 
 // Define Enum
 const Step = {
@@ -52,7 +58,9 @@ let configState = atom<State>({
   },
 });
 
-const ConfigScreen: FC<ConfigProps> = (props) => {
+const ConfigScreen: FC = () => {
+  const [taskListList, setTaskListList] = useRecoilState(taskListListState);
+  const [calendarList, setCalendarList] = useRecoilState(calendarListState);
   const [state, setState] = useRecoilState(configState);
   const userId = useRecoilValue(userIdState);
   const sendConfig = async (config: UserConfig) => {
@@ -71,8 +79,20 @@ const ConfigScreen: FC<ConfigProps> = (props) => {
       });
   };
   useEffect(() => {
-    const initState = { ...state, taskListId: props.taskListId, calendarId: props.calendarId };
-    setState(initState);
+    fetchTaskList().then((taskListList: TaskList[]) => {
+      setTaskListList(taskListList);
+    });
+    fetchCalendar().then((calendarList: Calendar[]) => {
+      setCalendarList(calendarList);
+    });
+    fetchUserProfile().then((userProfile: UserProfile) => {
+      const initState = {
+        ...state,
+        taskListId: userProfile.taskListId,
+        calendarId: userProfile.calendarId,
+      };
+      setState(initState);
+    });
   }, []);
   const nextStep = () => {
     if (state.step !== Step.TASKLIST) {
@@ -103,7 +123,7 @@ const ConfigScreen: FC<ConfigProps> = (props) => {
       <FormControl component="label">
         <FormLabel component="label">Select Task List</FormLabel>
         <RadioGroup name="TaskList" value={state.taskListId} onChange={handleChange("taskListId")}>
-          {props.taskListList.map((taskList, idx) => {
+          {taskListList.map((taskList, idx) => {
             return (
               <FormControlLabel
                 key={idx}
@@ -124,7 +144,7 @@ const ConfigScreen: FC<ConfigProps> = (props) => {
       <FormControl component="label">
         <FormLabel component="label">Select Calendar</FormLabel>
         <RadioGroup name="Calendar" value={state.calendarId} onChange={handleChange("calendarId")}>
-          {props.calendarList.map((calendar, idx) => {
+          {calendarList.map((calendar, idx) => {
             return (
               <FormControlLabel
                 key={idx}

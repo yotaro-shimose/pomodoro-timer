@@ -1,3 +1,5 @@
-const BackendURL = "http://localhost:8000";
+export const BackendURL = "http://localhost:8000";
 
-export { BackendURL };
+export const STATUS = {
+  ConfigNotCompleted: 452,
+};
