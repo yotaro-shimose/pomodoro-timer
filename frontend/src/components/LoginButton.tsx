@@ -5,50 +5,32 @@ import {
   GoogleLoginResponseOffline,
   GoogleLogout,
 } from "react-google-login";
-import axios, { AxiosResponse } from "axios";
-import { BackendURL } from "../constants";
-import { useRecoilValue } from "recoil";
-import { isLoggedInState } from "../atoms";
-import { UserProfile } from "../interfaces";
+import { useRecoilValue, useRecoilState, useSetRecoilState } from "recoil";
+import { isLoggedInState, userProfileState, taskListState } from "../atoms";
+import { UserProfile, Task } from "../interfaces";
+import { login, fetchTask } from "../api";
 
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const onFailure = (response: GoogleLoginResponse | GoogleLoginResponseOffline) =>
   console.log(response);
 
-interface LoginButtonProps {
-  setUserProfile: (userProfile: UserProfile) => void;
-}
-
-const LoginButton: FC<LoginButtonProps> = (props) => {
+const LoginButton: FC = (props) => {
   const scope = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/tasks";
-  const setUserProfile = props.setUserProfile;
+  const [userProfile, setUserProfile] = useRecoilState(userProfileState);
+  const setTaskList = useSetRecoilState(taskListState);
   const handleGoogleLogin = (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
-    console.log(response.code);
-    axios
-      .post(
-        `${BackendURL}/login`,
-        {
-          authorizationCode: response.code,
-        },
-        {
-          headers: {
-            // "Content-Type": "application/x-www-form-urlencoded",
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .then((res: AxiosResponse<UserProfile>) => {
-        setUserProfile(res.data);
-        if (res.data.calendarId) {
-          (res.data.taskListId)
-        }
-        else {
-
-        }
-      });
+    response = response as GoogleLoginResponseOffline;
+    login(response.code).then((profile: UserProfile) => {
+      setUserProfile(profile);
+      if (profile.calendarId) {
+        fetchTask(userProfile.id).then((taskList: Task[]) => {
+          setTaskList(taskList);
+        });
+      }
+    });
   };
   const onLogoutSuccess = () => {
-    setUserProfile({ "id": "", "calendarId": "", "taskListId": "" });
+    setUserProfile({ id: "", calendarId: "", taskListId: "" });
   };
   const isLoggedIn = useRecoilValue(isLoggedInState);
   if (isLoggedIn) {

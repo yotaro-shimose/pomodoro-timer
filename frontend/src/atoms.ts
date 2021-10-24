@@ -4,9 +4,14 @@ import { Task, Timer, UserProfile } from "./interfaces";
 
 const { persistAtom } = recoilPersist();
 
+export const taskListState = atom<Task[] | null>({
+  key: "task",
+  default: [],
+});
+
 export const userProfileState = atom<UserProfile>({
   key: "userId",
-  default: { "id": "", "calendarId": "", "taskListId": "" },
+  default: { id: "", calendarId: "", taskListId: "" },
   effects_UNSTABLE: [persistAtom],
 });
 

@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC, useCallback, useEffect } from "react";
 
 // Material UI
 import Radio from "@material-ui/core/Radio";
@@ -35,13 +35,13 @@ const calendarListState = atom<Calendar[]>({
 });
 
 // Define Enum
-const Step = {
+const StepList = {
   TASKLIST: "TASKLIST",
   CALENDAR: "CALENDAR",
   SUCCESS: "SUCCESS",
   FAILURE: "FAILURE",
 } as const;
-type Step = typeof Step[keyof typeof Step];
+type Step = typeof StepList[keyof typeof StepList];
 
 interface State {
   step: Step;
@@ -52,7 +52,7 @@ interface State {
 let configState = atom<State>({
   key: "configState",
   default: {
-    step: Step.TASKLIST,
+    step: StepList.TASKLIST,
     taskListId: "",
     calendarId: "",
   },
@@ -72,20 +72,21 @@ const ConfigScreen: FC = () => {
         },
       })
       .then(() => {
-        setState({ ...state, step: Step.SUCCESS });
+        setState({ ...state, step: StepList.SUCCESS });
       })
       .catch(() => {
-        setState({ ...state, step: Step.FAILURE });
+        setState({ ...state, step: StepList.FAILURE });
       });
   };
-  useEffect(() => {
-    fetchTaskList().then((taskListList: TaskList[]) => {
+
+  const initState = useCallback(() => {
+    fetchTaskList(userProfile.id).then((taskListList: TaskList[]) => {
       setTaskListList(taskListList);
     });
-    fetchCalendar().then((calendarList: Calendar[]) => {
+    fetchCalendar(userProfile.id).then((calendarList: Calendar[]) => {
       setCalendarList(calendarList);
     });
-    fetchUserProfile().then((userProfile: UserProfile) => {
+    fetchUserProfile(userProfile.id).then((userProfile: UserProfile) => {
       const initState = {
         ...state,
         taskListId: userProfile.taskListId,
@@ -94,11 +95,14 @@ const ConfigScreen: FC = () => {
       setState(initState);
     });
   }, []);
+  useEffect(() => {
+    initState();
+  }, [initState]);
   const nextStep = () => {
-    if (state.step !== Step.TASKLIST) {
+    if (state.step !== StepList.TASKLIST) {
       throw "Unexpected Step!";
     }
-    const nextState = { ...state, step: Step.CALENDAR };
+    const nextState = { ...state, step: StepList.CALENDAR };
     setState(nextState);
   };
   const handleChange: (key: string) => (event: React.ChangeEvent<HTMLInputElement>) => void =
@@ -164,16 +168,16 @@ const ConfigScreen: FC = () => {
   const failureScreen = <MsgScreen msg="Configuration Failure. Please Contact Us." />;
   const content = (() => {
     switch (state.step) {
-      case Step.TASKLIST: {
+      case StepList.TASKLIST: {
         return taskListForm;
       }
-      case Step.CALENDAR: {
+      case StepList.CALENDAR: {
         return calendarForm;
       }
-      case Step.SUCCESS: {
+      case StepList.SUCCESS: {
         return successScreen;
       }
-      case Step.FAILURE: {
+      case StepList.FAILURE: {
         return failureScreen;
       }
       default:
