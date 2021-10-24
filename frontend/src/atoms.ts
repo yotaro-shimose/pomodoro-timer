@@ -4,7 +4,7 @@ import { Task, Timer, UserProfile } from "./interfaces";
 
 const { persistAtom } = recoilPersist();
 
-export const taskListState = atom<Task[] | null>({
+export const taskListState = atom<Task[]>({
   key: "task",
   default: [],
 });
@@ -24,6 +24,11 @@ export const isLoggedInState = selector<boolean>({
       return false;
     }
   },
+});
+
+export const needConfigState = atom<boolean>({
+  key: "needConfig",
+  default: false,
 });
 
 export const selectedTask = atom<Task | null>({

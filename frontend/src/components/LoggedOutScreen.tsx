@@ -1,9 +1,10 @@
 import { FC } from "react";
-import { Typography } from "@material-ui/core";
+import { Toolbar, Typography } from "@material-ui/core";
 
 const LoggedOutScreen: FC = () => {
   return (
     <div className="LoggedOutScreen">
+      <Toolbar />
       <Typography>
         <h3>You have to log in first!</h3>
       </Typography>

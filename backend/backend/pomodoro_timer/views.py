@@ -115,14 +115,13 @@ def login(request: HttpRequest) -> HttpResponse:
 
 
 def _get_user(request: HttpRequest) -> HttpResponse:
-    # id = request.META["id"]
-    id = "c383b488ec40966bdb12e1cbd4a3ee05faa85f2ebb848e9ed2f57edb0543f885"
+    id = request.headers["id"]
     user: User = User.objects.get(id=id)
     return HttpResponse(json.dumps(user.get_response(), ensure_ascii=False))
 
 
 def _update_user(request: HttpRequest) -> HttpResponse:
-    # id = request.META["id"]
+    id = request.headers["id"]
     body = parse_body(request.body)
     user: User = User.objects.select_for_update().filter(id=id).first()
     user.access_token = body.get("accessToken", user.access_token)
@@ -144,9 +143,7 @@ def collect_user(request: HttpRequest) -> HttpResponse:
 
 
 def get_task_list(request: HttpRequest) -> HttpResponse:
-
-    # id = request.META["id"]
-    id = "c383b488ec40966bdb12e1cbd4a3ee05faa85f2ebb848e9ed2f57edb0543f885"
+    id = request.headers["id"]
     user: User = User.objects.get(id=id)
     credentials = Credentials(
         token=user.access_token,
@@ -169,11 +166,9 @@ def get_task_list(request: HttpRequest) -> HttpResponse:
 
 
 def get_task(request: HttpRequest) -> HttpResponse:
-    # id = request.META["id"]
-    id = "c383b488ec40966bdb12e1cbd4a3ee05faa85f2ebb848e9ed2f57edb0543f885"
+    id = request.headers["id"]
     user: User = User.objects.get(id=id)
-    # task_list_id = user.task_list_id
-    task_list_id = "MDQ5MzU1MzMzODMxNjQ1MzU3Mjk6MDow"
+    task_list_id = user.task_list_id
     credentials = Credentials(
         token=user.access_token,
         refresh_token=user.refresh_token,
@@ -195,8 +190,7 @@ def get_task(request: HttpRequest) -> HttpResponse:
 
 
 def get_calendar(request: HttpRequest) -> HttpResponse:
-    # id = request.META["id"]
-    id = "c383b488ec40966bdb12e1cbd4a3ee05faa85f2ebb848e9ed2f57edb0543f885"
+    id = request.headers["id"]
     user: User = User.objects.get(id=id)
     credentials = Credentials(
         token=user.access_token,

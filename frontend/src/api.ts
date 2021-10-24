@@ -3,7 +3,7 @@ import axios, { AxiosResponse } from "axios";
 import { BackendURL } from "./constants";
 export const fetchTask: (id: string) => Promise<Task[]> = async (id: string) => {
   const taskList = await axios
-    .get(`${BackendURL}/login`, {
+    .get(`${BackendURL}/task`, {
       headers: {
         "Content-Type": "application/json",
         id: id,
@@ -44,6 +44,7 @@ export const fetchCalendar: (id: string) => Promise<Calendar[]> = async (id: str
 };
 
 export const login: (code: string) => Promise<UserProfile> = async (code: string) => {
+  console.log(code);
   const profile = await axios.post<UserProfile>(
     `${BackendURL}/login`,
     {

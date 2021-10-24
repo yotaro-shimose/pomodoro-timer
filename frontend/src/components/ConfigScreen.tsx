@@ -115,6 +115,7 @@ const ConfigScreen: FC = () => {
       setState(nextState);
     };
   const hundleSubmit: () => void = () => {
+    // TODO fetchTask
     const config: UserConfig = {
       taskListId: state.taskListId,
       calendarId: state.calendarId,

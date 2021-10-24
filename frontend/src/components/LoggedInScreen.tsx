@@ -3,7 +3,7 @@ import { FC, useEffect } from "react";
 import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 
 // Material UI
-import { Typography } from "@material-ui/core";
+import { Typography, Toolbar } from "@material-ui/core";
 
 // Components
 import SideBar from "./SideBar";
@@ -18,7 +18,6 @@ import { userProfileState, taskListState } from "../atoms";
 
 // API
 import { fetchTask } from "../api";
-import { STATUS } from "../constants";
 
 const drawerWidth = 240;
 
@@ -40,8 +39,8 @@ export const LoggedInScreen: FC = () => {
   };
 
   const ConditionedSideBar: FC = () => {
-    if (taskList) {
-      return <SideBar drawerWidth={drawerWidth} tasks={taskList} />;
+    if (userProfile.taskListId) {
+      return <SideBar drawerWidth={drawerWidth} />;
     } else {
       return null;
     }
@@ -51,15 +50,14 @@ export const LoggedInScreen: FC = () => {
       .then((taskList: Task[]) => {
         setTaskList(taskList);
       })
-      .catch((error: APIError) => {
-        if (error.status === STATUS.ConfigNotCompleted) {
-          setNeedConfig(true);
-        }
+      .catch((_error: APIError) => {
+        setNeedConfig(true);
       });
-  }, [userProfile, setTaskList, setNeedConfig]);
+  }, []);
   return (
     <div className="LoggedInScreen">
       <ConditionedSideBar />
+      <Toolbar />
       <Router>
         <Route path="/" render={() => (needConfig ? <Redirect to="/config" /> : <MainContent />)} />
         <Route exact path="/config">

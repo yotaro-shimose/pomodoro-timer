@@ -52,7 +52,6 @@ const LoginButton: FC = (props) => {
       responseType="code"
       accessType="offline"
       scope={scope}
-      isSignedIn={true}
       redirectUri="postmessage"
     />
   );

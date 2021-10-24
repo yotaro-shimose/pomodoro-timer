@@ -3,7 +3,7 @@ import { FC } from "react";
 
 // Material UI
 import { makeStyles, Theme } from "@material-ui/core";
-import { CssBaseline, Toolbar } from "@material-ui/core";
+import { CssBaseline } from "@material-ui/core";
 import { createStyles } from "@material-ui/core/styles";
 
 // Components
@@ -48,7 +48,6 @@ const Main: FC = () => {
       <TitledToolbar appTitle={appTitle} drawerWidth={drawerWidth} />
 
       <main className={classes.content}>
-        <Toolbar />
         <MainScreen />
       </main>
     </div>
