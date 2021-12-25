@@ -1,48 +1,42 @@
-import { atom, selector } from 'recoil';
-import { CalendarList } from "./interfaces/interfaces";
-import { Token } from './interfaces/interfaces';
+import { atom, selector } from "recoil";
 import { recoilPersist } from "recoil-persist";
+import { Task, Timer, UserProfile } from "./interfaces";
 
 const { persistAtom } = recoilPersist();
 
-
-const tokenState = atom<Token | null>({
-    key: 'token',
-    default: null,
-    effects_UNSTABLE: [persistAtom],
-})
-
-
-const isLoggedInState = selector<boolean>({
-    key: 'isLoggedIn',
-    get: ({ get }) => {
-        if (get(tokenState)) {
-            return true;
-        } else {
-            return false;
-        }
-    },
+export const taskListState = atom<Task[]>({
+  key: "task",
+  default: [],
 });
 
-const calendarIdState = atom<string | null>({
-    key: 'calendarId',
-    default: null
+export const userProfileState = atom<UserProfile>({
+  key: "userId",
+  default: { id: "", calendarId: "", taskListId: "" },
+  effects_UNSTABLE: [persistAtom],
 });
 
-const calendarListQuery = selector<CalendarList | null>({
-    key: 'calendarIdQuery',
-    get: async ({ get }) => {
-        if (!get(isLoggedInState)) {
-            return null;
-        }
-        const calendarId = get(calendarIdState);
-        if (calendarId) {
-            // TODO
-            throw 'Not Implemented Error';
-        } else {
-            return null;
-        }
+export const isLoggedInState = selector<boolean>({
+  key: "isLoggedIn",
+  get: ({ get }) => {
+    if (get(userProfileState).id) {
+      return true;
+    } else {
+      return false;
     }
-})
+  },
+});
 
-export { tokenState, isLoggedInState, calendarIdState };
+export const needConfigState = atom<boolean>({
+  key: "needConfig",
+  default: false,
+});
+
+export const selectedTask = atom<Task | null>({
+  key: "selectedTask",
+  default: null,
+});
+
+export const timerState = atom<Timer | null>({
+  key: "timer",
+  default: null,
+});

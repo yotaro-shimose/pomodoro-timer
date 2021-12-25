@@ -1,65 +1,57 @@
-import { FC } from 'react';
-import { makeStyles, Theme, Toolbar, Typography, AppBar } from '@material-ui/core';
-import { CssBaseline } from '@material-ui/core';
-import { createStyles } from '@material-ui/core/styles';
-import { Task } from '../interfaces/interfaces';
-import SideBar from './SideBar';
-import LoginButton from './LoginButton';
-// import { calendarIdState, isLoggedInState } from '../atoms';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { tokenState } from '../atoms';
+// React
+import { FC } from "react";
+
+// Material UI
+import { makeStyles, Theme } from "@material-ui/core";
+import { CssBaseline } from "@material-ui/core";
+import { createStyles } from "@material-ui/core/styles";
+
+// Components
+import TitledToolbar from "./TitledToolbar";
+
+// State
+import { useRecoilValue } from "recoil";
+import { isLoggedInState } from "../atoms";
+
+// API
+import LoggedInScreen from "./LoggedInScreen";
+import LoggedOutScreen from "./LoggedOutScreen";
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            display: 'flex',
-        },
-        appBar: {
-            flexGrow: 1,
-            zIndex: theme.zIndex.drawer + 1,
-        },
-        barRight: {
-            flexGrow: 1,
-        },
-        content: {
-            flexGrow: 1,
-            padding: theme.spacing(3),
-            marginLeft: 2 * drawerWidth,
-        },
-    }),
+  createStyles({
+    root: {
+      display: "flex",
+    },
+    content: {
+      flexGrow: 1,
+      padding: theme.spacing(3),
+    },
+  })
 );
 
-
-
-const tasks: Task[] = [{ name: "Task1" }, { name: "Task2" }, { name: "Task3" }, { name: "Task4" }];
 const Main: FC = () => {
-    const appTitle = 'PomodoroTimer(仮)';
-    const classes = useStyles();
-    const setToken = useSetRecoilState(tokenState);
-    // const calendarId = useRecoilValue(calendarIdState);
-    // const isLoggedIn = useRecoilValue(isLoggedInState);
+  const appTitle = "PomodoroTimer(仮)";
+  const classes = useStyles();
+  const isLoggedIn = useRecoilValue(isLoggedInState);
+  const MainScreen: FC = () => {
+    if (isLoggedIn) {
+      return <LoggedInScreen />;
+    } else {
+      return <LoggedOutScreen />;
+    }
+  };
 
-    return (
-        <div className={classes.root}>
-            <CssBaseline />
-            <AppBar position="fixed" className={classes.appBar}>
-                <Toolbar>
-                    <Typography variant="h6" noWrap>
-                        {appTitle}
-                    </Typography>
-                    <div className={classes.barRight} />
-                    <LoginButton />
-                </Toolbar>
-            </AppBar>
-            <SideBar drawerWidth={drawerWidth} tasks={tasks} />
-            <main className={classes.content}>
-                <Toolbar />
+  return (
+    <div className={classes.root}>
+      <CssBaseline />
+      <TitledToolbar appTitle={appTitle} drawerWidth={drawerWidth} />
 
-                {/* <TimerScreen name={taskName} duration={10} onDone={onDone} /> */}
-            </main>
-        </div >
-    )
-}
+      <main className={classes.content}>
+        <MainScreen />
+      </main>
+    </div>
+  );
+};
 
 export default Main;
