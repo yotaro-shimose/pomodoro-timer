@@ -22,7 +22,7 @@ import { BackendURL } from "../constants";
 import MsgScreen from "./MsgScreen";
 
 // API
-import { fetchTaskList, fetchCalendar, fetchUserConfig } from "../api";
+import { fetchTaskList, fetchCalendar } from "../api";
 
 const taskListListState = atom<TaskList[]>({
   key: "taskList",
@@ -60,6 +60,7 @@ let configState = atom<State>({
 
 interface ConfigScreenProps {
   userConfig: UserConfig;
+  setUserConfig(config: UserConfig): void;
 }
 
 const ConfigScreen: FC<ConfigScreenProps> = (props: ConfigScreenProps) => {
@@ -68,6 +69,7 @@ const ConfigScreen: FC<ConfigScreenProps> = (props: ConfigScreenProps) => {
   const [state, setState] = useRecoilState(configState);
   const userId = useRecoilValue(userIdState);
   const sendConfig = async (config: UserConfig) => {
+    console.log("config", config);
     axios
       .put<boolean>(`${BackendURL}/user`, config, {
         headers: {
@@ -99,7 +101,8 @@ const ConfigScreen: FC<ConfigScreenProps> = (props: ConfigScreenProps) => {
   }, []);
   useEffect(() => {
     initState();
-  }, [initState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const nextStep = () => {
     if (state.step !== StepList.TASKLIST) {
       throw "Unexpected Step!";
@@ -117,12 +120,13 @@ const ConfigScreen: FC<ConfigScreenProps> = (props: ConfigScreenProps) => {
       setState(nextState);
     };
   const hundleSubmit: () => void = () => {
-    // TODO fetchTask
     const config: UserConfig = {
       taskListId: state.taskListId,
       calendarId: state.calendarId,
     };
     sendConfig(config);
+    console.log("refreshing");
+    props.setUserConfig(config);
   };
 
   const taskListForm = (

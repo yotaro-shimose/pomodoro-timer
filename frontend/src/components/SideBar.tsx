@@ -36,7 +36,6 @@ const SideBar: FC<SideBarProps> = (props: SideBarProps) => {
   const userId = useRecoilValue(userIdState);
   const [taskList, setTaskList] = useRecoilState(taskListState);
   useEffect(() => {
-    console.log(userId);
     fetchTask(userId).then((taskList: Task[]) => {
       setTaskList(taskList);
     });

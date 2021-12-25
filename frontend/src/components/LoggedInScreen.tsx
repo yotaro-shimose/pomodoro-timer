@@ -1,6 +1,5 @@
 // React
 import { FC, useEffect } from "react";
-import { BrowserRouter as Router, Route, Redirect, Switch } from "react-router-dom";
 
 // Material UI
 import { Toolbar } from "@material-ui/core";
@@ -33,7 +32,6 @@ export const LoggedInScreen: FC = () => {
     });
   }, []);
   const isConfigured = useRecoilValue(isConfiguredState);
-
   const ConditionedSideBar: FC = () => {
     if (isConfigured) {
       return (
@@ -47,24 +45,19 @@ export const LoggedInScreen: FC = () => {
       return null;
     }
   };
+  const ConditionedLoggedInScreen: FC = () => {
+    if (isConfigured) {
+      return <Content selectedTask={selectedTask} />;
+    } else {
+      return <ConfigScreen userConfig={userConfig} setUserConfig={setUserConfig} />;
+    }
+  };
 
   return (
     <div className="LoggedInScreen">
       <ConditionedSideBar />
       <Toolbar />
-      <Router>
-        <Switch>
-          <Route
-            path="/"
-            render={() =>
-              isConfigured ? <Content selectedTask={selectedTask} /> : <Redirect to="/config" />
-            }
-          />
-          <Route exact path="/config">
-            <ConfigScreen userConfig={userConfig} />
-          </Route>
-        </Switch>
-      </Router>
+      <ConditionedLoggedInScreen />
     </div>
   );
 };
