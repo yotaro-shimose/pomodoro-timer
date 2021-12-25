@@ -52,3 +52,13 @@ export const timerState = atom<Timer | null>({
   key: "timer",
   default: null,
 });
+
+export const startTimeState = atom<Date | null>({
+  key: "startTime",
+  default: null,
+})
+
+export const timerConfigState = atom<number | null>({
+  key: "timerConfig",
+  default: null,
+})
