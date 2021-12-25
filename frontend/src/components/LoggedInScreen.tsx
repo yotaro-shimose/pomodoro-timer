@@ -8,10 +8,11 @@ import { Typography, Toolbar } from "@material-ui/core";
 // Components
 import SideBar from "./SideBar";
 import ConfigScreen from "./ConfigScreen";
+import Content from "./Content";
 
 // State
 import { useRecoilValue, useRecoilState } from "recoil";
-import { isConfiguredState, userConfigState, userIdState } from "../atoms";
+import { isConfiguredState, userConfigState, userIdState, selectedTaskState } from "../atoms";
 
 // API
 import { fetchUserConfig } from "../api";
@@ -24,23 +25,24 @@ const drawerWidth = 240;
 export const LoggedInScreen: FC = () => {
   const userId = useRecoilValue(userIdState);
   const [userConfig, setUserConfig] = useRecoilState(userConfigState);
+  const [selectedTask, setSelectedTask] = useRecoilState(selectedTaskState);
+
   useEffect(() => {
     fetchUserConfig(userId).then((userConfig: UserConfig) => {
       setUserConfig(userConfig);
     });
   }, []);
   const isConfigured = useRecoilValue(isConfiguredState);
-  let MainContent: FC = () => {
-    return (
-      <Typography>
-        <h3>This is a main content</h3>
-      </Typography>
-    );
-  };
 
   const ConditionedSideBar: FC = () => {
     if (isConfigured) {
-      return <SideBar drawerWidth={drawerWidth} />;
+      return (
+        <SideBar
+          drawerWidth={drawerWidth}
+          selectedTask={selectedTask}
+          setSelectedTask={setSelectedTask}
+        />
+      );
     } else {
       return null;
     }
@@ -54,7 +56,9 @@ export const LoggedInScreen: FC = () => {
         <Switch>
           <Route
             path="/"
-            render={() => (isConfigured ? <MainContent /> : <Redirect to="/config" />)}
+            render={() =>
+              isConfigured ? <Content selectedTask={selectedTask} /> : <Redirect to="/config" />
+            }
           />
           <Route exact path="/config">
             <ConfigScreen userConfig={userConfig} />

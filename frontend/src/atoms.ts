@@ -43,7 +43,7 @@ export const isConfiguredState = selector<boolean>({
   },
 });
 
-export const selectedTask = atom<Task | null>({
+export const selectedTaskState = atom<Task | null>({
   key: "selectedTask",
   default: null,
 });

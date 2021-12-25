@@ -13,6 +13,8 @@ import { taskListState, userIdState } from "../atoms";
 
 interface SideBarProps {
   drawerWidth: number;
+  selectedTask: Task | null;
+  setSelectedTask(task: Task | null): void;
 }
 
 const SideBar: FC<SideBarProps> = (props: SideBarProps) => {
