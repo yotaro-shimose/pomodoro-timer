@@ -6,13 +6,22 @@ interface LoginResponse {
   id: string;
 }
 
+interface Headers {
+  "Content-Type": string;
+  id: string;
+}
+
+const get_headers: (id: string) => Headers = (id: string) => {
+  return {
+    "Content-Type": "application/json",
+    id: id,
+  };
+};
+
 export const fetchTask: (id: string) => Promise<Task[]> = async (id: string) => {
   const taskList = await axios
     .get(`${BackendURL}/task`, {
-      headers: {
-        "Content-Type": "application/json",
-        id: id,
-      },
+      headers: get_headers(id),
     })
     .then((res: AxiosResponse<Task[]>) => {
       return res.data;
@@ -23,10 +32,7 @@ export const fetchTask: (id: string) => Promise<Task[]> = async (id: string) => 
 export const fetchTaskList: (id: string) => Promise<TaskList[]> = async (id: string) => {
   const taskListList = await axios
     .get(`${BackendURL}/taskList`, {
-      headers: {
-        "Content-Type": "application/json",
-        id: id,
-      },
+      headers: get_headers(id),
     })
     .then((res: AxiosResponse<TaskList[]>) => {
       return res.data;
@@ -37,10 +43,7 @@ export const fetchTaskList: (id: string) => Promise<TaskList[]> = async (id: str
 export const fetchCalendar: (id: string) => Promise<Calendar[]> = async (id: string) => {
   const calendarList = await axios
     .get(`${BackendURL}/calendar`, {
-      headers: {
-        "Content-Type": "application/json",
-        id: id,
-      },
+      headers: get_headers(id),
     })
     .then((res: AxiosResponse<Calendar[]>) => {
       return res.data;
@@ -68,8 +71,12 @@ export const login: (code: string) => Promise<string> = async (code: string) => 
 };
 
 export const fetchUserConfig: (id: string) => Promise<UserConfig> = async (id: string) => {
-  return {
-    taskListId: "id1",
-    calendarId: "cid2",
-  };
+  const calendarList = await axios
+    .get(`${BackendURL}/userConfig`, {
+      headers: get_headers(id),
+    })
+    .then((res: AxiosResponse<UserConfig>) => {
+      return res.data;
+    });
+  return calendarList;
 };
