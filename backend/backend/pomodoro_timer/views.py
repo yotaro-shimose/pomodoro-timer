@@ -47,31 +47,6 @@ def get_task(request: HttpRequest) -> HttpResponse:
     return HttpResponse(json.dumps(task_list, ensure_ascii=False))
 
 
-def list_calendar(request: HttpRequest) -> HttpResponse:
-    body = parse_body(request.body)
-    access_token = body["accessToken"]
-    refresh_token = body["refreshToken"]
-    credentials = Credentials(
-        access_token,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        scopes=SCOPES,
-        refresh_token=refresh_token,
-    )
-    if not credentials.valid:
-        credentials.refresh(Request())
-    service = build("calendar", "v3", credentials=credentials)
-    google_response = service.calendarList().list(showHidden=True,).execute()
-    calendar_list = google_response["items"]
-    response = {
-        "items": [
-            {"summary": item["summary"], "id": item["id"]} for item in calendar_list
-        ]
-    }
-    return HttpResponse(json.dumps(response))
-
-
 def _create_hash_data(gmail_address: str) -> str:
     return hashlib.sha256(gmail_address.encode("utf-8")).hexdigest()
 
@@ -111,13 +86,19 @@ def login(request: HttpRequest) -> HttpResponse:
             refresh_token=token_response["refresh_token"],
         )
         User.save(user)
-    return HttpResponse(json.dumps(user.get_response(), ensure_ascii=False,))
+    response = {
+        "id": user.id
+    }
+    return HttpResponse(json.dumps(response, ensure_ascii=False))
 
 
 def _get_user(request: HttpRequest) -> HttpResponse:
     id = request.headers["id"]
     user: User = User.objects.get(id=id)
-    return HttpResponse(json.dumps(user.get_response(), ensure_ascii=False))
+    response = {
+        "id": user.id
+    }
+    return HttpResponse(json.dumps(response, ensure_ascii=False))
 
 
 def _update_user(request: HttpRequest) -> HttpResponse:
@@ -126,10 +107,13 @@ def _update_user(request: HttpRequest) -> HttpResponse:
     user: User = User.objects.select_for_update().filter(id=id).first()
     user.access_token = body.get("accessToken", user.access_token)
     user.refresh_token = body.get("refreshToken", user.refresh_token)
-    user.calender_id = body.get("calenderId", user.calender_id)
+    user.calendar_id = body.get("calenderId", user.calendar_id)
     user.task_list_id = body.get("taskListId", user.task_list_id)
     User.save(user)
-    return HttpResponse(json.dumps(user.get_response(), ensure_ascii=False,))
+    response = {
+        "id": user.id
+    }
+    return HttpResponse(json.dumps(response, ensure_ascii=False))
 
 
 def collect_user(request: HttpRequest) -> HttpResponse:
@@ -203,11 +187,18 @@ def get_calendar(request: HttpRequest) -> HttpResponse:
     if not credentials.valid:
         credentials.refresh(Request())
     service = build("calendar", "v3", credentials=credentials)
-    google_response = service.calendarList().list(showHidden=True,).execute()
+    google_response = service.calendarList().list(showHidden=True).execute()
     calendar_list = google_response["items"]
-    response = {
-        "items": [
+    response = [
             {"summary": item["summary"], "id": item["id"]} for item in calendar_list
-        ]
+    ]
+    return HttpResponse(json.dumps(response, ensure_ascii=False))
+
+def get_user_config(request: HttpRequest) -> HttpResponse:
+    id = request.headers["id"]
+    user: User = User.objects.get(id=id)
+    response = {
+        "taskListId": user.task_list_id,
+        "calendarId": user.calendar_id,
     }
     return HttpResponse(json.dumps(response, ensure_ascii=False))
