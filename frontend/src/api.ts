@@ -1,6 +1,11 @@
 import { Task, TaskList, Calendar, UserConfig } from "./interfaces";
 import axios, { AxiosResponse } from "axios";
 import { BackendURL } from "./constants";
+
+interface LoginResponse {
+  id: string;
+}
+
 export const fetchTask: (id: string) => Promise<Task[]> = async (id: string) => {
   const taskList = await axios
     .get(`${BackendURL}/task`, {
@@ -45,7 +50,7 @@ export const fetchCalendar: (id: string) => Promise<Calendar[]> = async (id: str
 
 export const login: (code: string) => Promise<string> = async (code: string) => {
   const userId = await axios
-    .post<string>(
+    .post<LoginResponse>(
       `${BackendURL}/login`,
       {
         authorizationCode: code,
@@ -56,8 +61,8 @@ export const login: (code: string) => Promise<string> = async (code: string) => 
         },
       }
     )
-    .then((res: AxiosResponse<string>) => {
-      return res.data;
+    .then((res: AxiosResponse<LoginResponse>) => {
+      return res.data.id;
     });
   return userId;
 };

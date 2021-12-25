@@ -3,7 +3,7 @@ import { FC, useEffect } from "react";
 import { BrowserRouter as Router, Route, Redirect, Switch } from "react-router-dom";
 
 // Material UI
-import { Typography, Toolbar } from "@material-ui/core";
+import { Toolbar } from "@material-ui/core";
 
 // Components
 import SideBar from "./SideBar";

@@ -36,10 +36,12 @@ const SideBar: FC<SideBarProps> = (props: SideBarProps) => {
   const userId = useRecoilValue(userIdState);
   const [taskList, setTaskList] = useRecoilState(taskListState);
   useEffect(() => {
+    console.log(userId);
     fetchTask(userId).then((taskList: Task[]) => {
       setTaskList(taskList);
     });
   }, [setTaskList, userId]);
+  const selectedTaskId = props.selectedTask ? props.selectedTask.id : null;
   return (
     <Drawer
       className={classes.drawer}
@@ -53,7 +55,7 @@ const SideBar: FC<SideBarProps> = (props: SideBarProps) => {
       <div className={classes.drawerContainer}>
         <List>
           {taskList.map((task, index) => (
-            <ListItem button key={index}>
+            <ListItem button key={index} selected={task.id === selectedTaskId}>
               <ListItemText primary={task.name} />
             </ListItem>
           ))}

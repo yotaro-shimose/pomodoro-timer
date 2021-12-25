@@ -12,6 +12,4 @@ class User(models.Model):
     def get_response(self) -> Dict[str, str]:
         return {
             "id": self.id,
-            "calender_id": self.calender_id,
-            "task_list_id": self.task_list_id,
         }
