@@ -1,4 +1,4 @@
-import { Task, TaskList, Calendar, UserProfile } from "./interfaces";
+import { Task, TaskList, Calendar, UserConfig } from "./interfaces";
 import axios, { AxiosResponse } from "axios";
 import { BackendURL } from "./constants";
 export const fetchTask: (id: string) => Promise<Task[]> = async (id: string) => {
@@ -43,25 +43,27 @@ export const fetchCalendar: (id: string) => Promise<Calendar[]> = async (id: str
   return calendarList;
 };
 
-export const login: (code: string) => Promise<UserProfile> = async (code: string) => {
-  console.log(code);
-  const profile = await axios.post<UserProfile>(
-    `${BackendURL}/login`,
-    {
-      authorizationCode: code,
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
+export const login: (code: string) => Promise<string> = async (code: string) => {
+  const userId = await axios
+    .post<string>(
+      `${BackendURL}/login`,
+      {
+        authorizationCode: code,
       },
-    }
-  );
-  return profile.data;
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((res: AxiosResponse<string>) => {
+      return res.data;
+    });
+  return userId;
 };
 
-export const fetchUserProfile: (id: string) => Promise<UserProfile> = async (id: string) => {
+export const fetchUserConfig: (id: string) => Promise<UserConfig> = async (id: string) => {
   return {
-    id: "myUserId",
     taskListId: "id1",
     calendarId: "cid2",
   };

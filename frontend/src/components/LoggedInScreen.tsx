@@ -1,6 +1,6 @@
 // React
 import { FC, useEffect } from "react";
-import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
+import { BrowserRouter as Router, Route, Redirect, Switch } from "react-router-dom";
 
 // Material UI
 import { Typography, Toolbar } from "@material-ui/core";
@@ -9,27 +9,27 @@ import { Typography, Toolbar } from "@material-ui/core";
 import SideBar from "./SideBar";
 import ConfigScreen from "./ConfigScreen";
 
-// interfaces
-import { Task, APIError } from "../interfaces";
-
 // State
-import { atom, useRecoilState, useRecoilValue } from "recoil";
-import { userProfileState, taskListState } from "../atoms";
+import { useRecoilValue, useRecoilState } from "recoil";
+import { isConfiguredState, userConfigState, userIdState } from "../atoms";
 
 // API
-import { fetchTask } from "../api";
+import { fetchUserConfig } from "../api";
+
+// Interfaces
+import { UserConfig } from "../interfaces";
 
 const drawerWidth = 240;
 
-const needConfigState = atom<boolean>({
-  key: "needConfig",
-  default: false,
-});
-
 export const LoggedInScreen: FC = () => {
-  const userProfile = useRecoilValue(userProfileState);
-  const [needConfig, setNeedConfig] = useRecoilState(needConfigState);
-  const [taskList, setTaskList] = useRecoilState(taskListState);
+  const userId = useRecoilValue(userIdState);
+  const [userConfig, setUserConfig] = useRecoilState(userConfigState);
+  useEffect(() => {
+    fetchUserConfig(userId).then((userConfig: UserConfig) => {
+      setUserConfig(userConfig);
+    });
+  }, []);
+  const isConfigured = useRecoilValue(isConfiguredState);
   let MainContent: FC = () => {
     return (
       <Typography>
@@ -39,32 +39,28 @@ export const LoggedInScreen: FC = () => {
   };
 
   const ConditionedSideBar: FC = () => {
-    if (userProfile.taskListId) {
+    if (isConfigured) {
       return <SideBar drawerWidth={drawerWidth} />;
     } else {
       return null;
     }
   };
-  useEffect(() => {
-    fetchTask(userProfile.id)
-      .then((taskList: Task[]) => {
-        setTaskList(taskList);
-      })
-      .catch((_error: APIError) => {
-        setNeedConfig(true);
-      });
-  }, []);
+
   return (
     <div className="LoggedInScreen">
       <ConditionedSideBar />
       <Toolbar />
       <Router>
-        <Route path="/" render={() => (needConfig ? <Redirect to="/config" /> : <MainContent />)} />
-        <Route exact path="/config">
-          <ConfigScreen />
-        </Route>
+        <Switch>
+          <Route
+            path="/"
+            render={() => (isConfigured ? <MainContent /> : <Redirect to="/config" />)}
+          />
+          <Route exact path="/config">
+            <ConfigScreen userConfig={userConfig} />
+          </Route>
+        </Switch>
       </Router>
-      {/* <TimerScreen name={taskName} duration={10} onDone={onDone} /> */}
     </div>
   );
 };
