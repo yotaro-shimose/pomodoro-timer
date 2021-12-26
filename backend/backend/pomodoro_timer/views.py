@@ -159,7 +159,7 @@ def get_task(request: HttpRequest) -> HttpResponse:
         credentials.refresh(Request())
 
     service = build("tasks", "v1", credentials=credentials)
-    items = service.tasks().list(tasklist=task_list_id).execute().get("items")
+    items = service.tasks().list(tasklist=task_list_id, showCompleted=False).execute().get("items")
     response_list = [
         {"id": item.get("id"), "name": item.get("title")} for item in items
     ]
