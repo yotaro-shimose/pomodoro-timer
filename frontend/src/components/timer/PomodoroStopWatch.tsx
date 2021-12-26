@@ -1,23 +1,21 @@
 // React
 import { FC, useEffect, useState } from "react";
 import { Typography, Toolbar, Grid } from "@material-ui/core";
-import { useTimer } from "react-timer-hook";
+import { useStopwatch } from "react-timer-hook";
 import TimerButton from "./atoms/TimerButton";
-import TimerScreen from "./atoms/TimerScreen";
-import ConfirmDialog from "./ConfirmDialog";
+import StopWatchScreen from "./atoms/StopWatchScreen";
 import { startTimeState } from "../../atoms";
-import { cancelFinishFactory, confirmFinishFactory, timerFinishFactory } from "../../factory";
+import ConfirmDialog from "./ConfirmDialog";
+import { confirmFinishFactory, timerFinishFactory, cancelFinishFactory } from "../../factory"
 import { Task } from "../../interfaces";
 // State
 import { useRecoilState } from "recoil";
-
-interface PomodoroTimerProps {
+interface PomodoroStopWatchProps {
     userId: string;
-    timerConfig: number;
     task: Task;
 }
 
-const PomodoroTimer: FC<PomodoroTimerProps> = (props) => {
+const PomodoroStopWatch: FC<PomodoroStopWatchProps> = (props) => {
 
     // Modalの中身作成
     const [open, setOpen] = useState(false);
@@ -28,15 +26,11 @@ const PomodoroTimer: FC<PomodoroTimerProps> = (props) => {
     useEffect(() => {
         setStartTime(new Date());
     }, []);
-
-    const time = new Date();
-    time.setMinutes(time.getMinutes() + props.timerConfig);
     // eslint-disable-next-line 
-    const { seconds, minutes, hours, days, isRunning, start, pause, resume, restart } = useTimer({
-        autoStart: true,
-        expiryTimestamp: time,
-        onExpire: handleOpen
+    const { seconds, minutes, hours, days, isRunning, start, pause, reset } = useStopwatch({
+        autoStart: true
     });
+
     const confirmFinish = confirmFinishFactory(pause, handleOpen);
     const finishName = "finish";
 
@@ -46,15 +40,15 @@ const PomodoroTimer: FC<PomodoroTimerProps> = (props) => {
             buttonName: finishName
         }
     ]
-
     const finish = timerFinishFactory(props.userId, props.task, startTime, handleClose);
     const cancel = cancelFinishFactory(start, handleClose)
 
+
     return (
-        <div className="PomodoroTimer">
+        <div className="StopWatchScreen">
             <Toolbar />
             <Typography variant="h3">{props.task.name}</Typography>
-            <TimerScreen minutes={minutes} seconds={seconds} />
+            <StopWatchScreen days={days} hours={hours} minutes={minutes} seconds={seconds} />
             <Grid container spacing={6} alignItems="center" justifyContent="center">
                 {buttonDataList.map((buttonData, index) => (
                     <Grid item>
@@ -69,4 +63,4 @@ const PomodoroTimer: FC<PomodoroTimerProps> = (props) => {
         </div>
     )
 }
-export default PomodoroTimer;
+export default PomodoroStopWatch;

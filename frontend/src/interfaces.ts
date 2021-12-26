@@ -33,3 +33,9 @@ export interface Timer {
   start: number;
   end: number;
 }
+
+export interface Event {
+  task: Task,
+  startTime: string,
+  endTime: string
+}

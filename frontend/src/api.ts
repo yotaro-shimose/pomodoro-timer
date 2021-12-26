@@ -1,4 +1,4 @@
-import { Task, TaskList, Calendar, UserConfig } from "./interfaces";
+import { Task, TaskList, Calendar, UserConfig, Event } from "./interfaces";
 import axios, { AxiosResponse } from "axios";
 import { BackendURL } from "./constants";
 
@@ -50,6 +50,19 @@ export const fetchCalendar: (id: string) => Promise<Calendar[]> = async (id: str
     });
   return calendarList;
 };
+
+export const pushEvent: (id: string, event: Event) => void = async (id: string, event: Event) => {
+  await axios
+    .post(`${BackendURL}/event`,
+      event
+      , {
+        headers: {
+          "Content-Type": "application/json",
+          id: id,
+        },
+      });
+}
+
 
 export const login: (code: string) => Promise<string> = async (code: string) => {
   const userId = await axios
