@@ -1,9 +1,8 @@
 // React
 import { FC, useEffect } from "react";
-import { BrowserRouter as Router, Route, Redirect, Switch } from "react-router-dom";
 
 // Material UI
-import { Typography, Toolbar } from "@material-ui/core";
+import { Toolbar } from "@material-ui/core";
 
 // Components
 import SideBar from "./SideBar";
@@ -12,7 +11,7 @@ import Content from "./Content";
 
 // State
 import { useRecoilValue, useRecoilState } from "recoil";
-import { isConfiguredState, userConfigState, userIdState, selectedTaskState } from "../atoms";
+import { isConfiguredState, userConfigState, userIdState, selectedTaskState, timerConfigState } from "../atoms";
 
 // API
 import { fetchUserConfig } from "../api";
@@ -26,6 +25,7 @@ export const LoggedInScreen: FC = () => {
   const userId = useRecoilValue(userIdState);
   const [userConfig, setUserConfig] = useRecoilState(userConfigState);
   const [selectedTask, setSelectedTask] = useRecoilState(selectedTaskState);
+  const [timerConfig, setTimerConfig] = useRecoilState(timerConfigState)
 
   useEffect(() => {
     fetchUserConfig(userId).then((userConfig: UserConfig) => {
@@ -33,7 +33,6 @@ export const LoggedInScreen: FC = () => {
     });
   }, []);
   const isConfigured = useRecoilValue(isConfiguredState);
-
   const ConditionedSideBar: FC = () => {
     if (isConfigured) {
       return (
@@ -41,10 +40,23 @@ export const LoggedInScreen: FC = () => {
           drawerWidth={drawerWidth}
           selectedTask={selectedTask}
           setSelectedTask={setSelectedTask}
+          setTimerConfig={setTimerConfig}
         />
       );
     } else {
       return null;
+    }
+  };
+  const ConditionedLoggedInScreen: FC = () => {
+    if (isConfigured) {
+      return <Content
+        selectedTask={selectedTask}
+        userId={userId}
+        timerConfig={timerConfig}
+        setTimerConfig={setTimerConfig}
+      />;
+    } else {
+      return <ConfigScreen userConfig={userConfig} setUserConfig={setUserConfig} />;
     }
   };
 
@@ -52,19 +64,7 @@ export const LoggedInScreen: FC = () => {
     <div className="LoggedInScreen">
       <ConditionedSideBar />
       <Toolbar />
-      <Router>
-        <Switch>
-          <Route
-            path="/"
-            render={() =>
-              isConfigured ? <Content selectedTask={selectedTask} /> : <Redirect to="/config" />
-            }
-          />
-          <Route exact path="/config">
-            <ConfigScreen userConfig={userConfig} />
-          </Route>
-        </Switch>
-      </Router>
+      <ConditionedLoggedInScreen />
     </div>
   );
 };

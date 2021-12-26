@@ -15,6 +15,7 @@ interface SideBarProps {
   drawerWidth: number;
   selectedTask: Task | null;
   setSelectedTask(task: Task | null): void;
+  setTimerConfig(timerConfig: number | null): void;
 }
 
 const SideBar: FC<SideBarProps> = (props: SideBarProps) => {
@@ -40,6 +41,8 @@ const SideBar: FC<SideBarProps> = (props: SideBarProps) => {
       setTaskList(taskList);
     });
   }, [setTaskList, userId]);
+  const selectedTaskId = props.selectedTask ? props.selectedTask.id : null;
+
   return (
     <Drawer
       className={classes.drawer}
@@ -53,7 +56,14 @@ const SideBar: FC<SideBarProps> = (props: SideBarProps) => {
       <div className={classes.drawerContainer}>
         <List>
           {taskList.map((task, index) => (
-            <ListItem button key={index}>
+            <ListItem
+              button key={index}
+              selected={task.id === selectedTaskId}
+              onClick={() => {
+                props.setSelectedTask(task);
+                props.setTimerConfig(null);
+              }
+              }>
               <ListItemText primary={task.name} />
             </ListItem>
           ))}
