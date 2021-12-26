@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Task } from "../interfaces";
 import { timerConfigState } from "../atoms";
 // State
-import { useRecoilValue, useRecoilState } from "recoil";
+import { useRecoilState } from "recoil";
 import SelectTimer from "./timer/SelectTimer";
 import { Toolbar, Typography } from "@material-ui/core";
 import PomodoroTimer from "./timer/PomodoroTimer";

@@ -31,7 +31,7 @@ const PomodoroTimer: FC<PomodoroTimerProps> = (props) => {
 
     const time = new Date();
     time.setMinutes(time.getMinutes() + props.timerConfig);
-
+    // eslint-disable-next-line 
     const { seconds, minutes, hours, days, isRunning, start, pause, resume, restart } = useTimer({
         autoStart: true,
         expiryTimestamp: time,

@@ -26,7 +26,7 @@ const PomodoroStopWatch: FC<PomodoroStopWatchProps> = (props) => {
     useEffect(() => {
         setStartTime(new Date());
     }, []);
-
+    // eslint-disable-next-line 
     const { seconds, minutes, hours, days, isRunning, start, pause, reset } = useStopwatch({
         autoStart: true
     });
