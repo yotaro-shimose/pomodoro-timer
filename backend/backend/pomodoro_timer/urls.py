@@ -9,5 +9,6 @@ urlpatterns = [
     path("login", views.login),
     path("taskList", views.get_task_list),
     path("userConfig", views.get_user_config),
+    path("event", views.insert_event),
     # path("schedule", views.schedule),
 ]

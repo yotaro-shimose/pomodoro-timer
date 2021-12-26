@@ -11,7 +11,7 @@ import Content from "./Content";
 
 // State
 import { useRecoilValue, useRecoilState } from "recoil";
-import { isConfiguredState, userConfigState, userIdState, selectedTaskState } from "../atoms";
+import { isConfiguredState, userConfigState, userIdState, selectedTaskState, timerConfigState } from "../atoms";
 
 // API
 import { fetchUserConfig } from "../api";
@@ -25,6 +25,7 @@ export const LoggedInScreen: FC = () => {
   const userId = useRecoilValue(userIdState);
   const [userConfig, setUserConfig] = useRecoilState(userConfigState);
   const [selectedTask, setSelectedTask] = useRecoilState(selectedTaskState);
+  const [timerConfig, setTimerConfig] = useRecoilState(timerConfigState)
 
   useEffect(() => {
     fetchUserConfig(userId).then((userConfig: UserConfig) => {
@@ -39,6 +40,7 @@ export const LoggedInScreen: FC = () => {
           drawerWidth={drawerWidth}
           selectedTask={selectedTask}
           setSelectedTask={setSelectedTask}
+          setTimerConfig={setTimerConfig}
         />
       );
     } else {
@@ -47,7 +49,12 @@ export const LoggedInScreen: FC = () => {
   };
   const ConditionedLoggedInScreen: FC = () => {
     if (isConfigured) {
-      return <Content selectedTask={selectedTask} />;
+      return <Content
+        selectedTask={selectedTask}
+        userId={userId}
+        timerConfig={timerConfig}
+        setTimerConfig={setTimerConfig}
+      />;
     } else {
       return <ConfigScreen userConfig={userConfig} setUserConfig={setUserConfig} />;
     }

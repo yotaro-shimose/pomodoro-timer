@@ -10,21 +10,22 @@ import PomodoroStopWatch from "./timer/PomodoroStopWatch";
 interface ContentProps {
   userId: string;
   selectedTask: Task | null;
+  timerConfig: number | null;
+  setTimerConfig(timerConfig: number | null): void;
 }
 const Content: FC<ContentProps> = (props) => {
-  const [timerConfig, setTimerConfig] = useRecoilState(timerConfigState)
   let content;
   if (props.selectedTask) {
-    if (timerConfig != null) {
-      if (timerConfig) {
-        content = <PomodoroTimer userId={props.userId} timerConfig={timerConfig} task={props.selectedTask}></PomodoroTimer>
+    if (props.timerConfig != null) {
+      if (props.timerConfig) {
+        content = <PomodoroTimer userId={props.userId} timerConfig={props.timerConfig} task={props.selectedTask}></PomodoroTimer>
       }
       else {
         content = <PomodoroStopWatch userId={props.userId} task={props.selectedTask}></PomodoroStopWatch>
       }
     }
     else {
-      content = <SelectTimer setTimerConfig={setTimerConfig} task={props.selectedTask} />
+      content = <SelectTimer setTimerConfig={props.setTimerConfig} task={props.selectedTask} />
     }
   }
   else {
