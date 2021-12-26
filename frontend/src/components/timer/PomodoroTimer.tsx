@@ -26,6 +26,7 @@ const PomodoroTimer: FC<PomodoroTimerProps> = (props) => {
   const [startTime, setStartTime] = useRecoilState(startTimeState);
   useEffect(() => {
     setStartTime(new Date());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const time = new Date();

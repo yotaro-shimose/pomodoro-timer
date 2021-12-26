@@ -11,7 +11,13 @@ import Content from "./Content";
 
 // State
 import { useRecoilValue, useRecoilState } from "recoil";
-import { isConfiguredState, userConfigState, userIdState, selectedTaskState, timerConfigState } from "../atoms";
+import {
+  isConfiguredState,
+  userConfigState,
+  userIdState,
+  selectedTaskState,
+  timerConfigState,
+} from "../atoms";
 
 // API
 import { fetchUserConfig } from "../api";
@@ -25,12 +31,13 @@ export const LoggedInScreen: FC = () => {
   const userId = useRecoilValue(userIdState);
   const [userConfig, setUserConfig] = useRecoilState(userConfigState);
   const [selectedTask, setSelectedTask] = useRecoilState(selectedTaskState);
-  const [timerConfig, setTimerConfig] = useRecoilState(timerConfigState)
+  const [timerConfig, setTimerConfig] = useRecoilState(timerConfigState);
 
   useEffect(() => {
     fetchUserConfig(userId).then((userConfig: UserConfig) => {
       setUserConfig(userConfig);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const isConfigured = useRecoilValue(isConfiguredState);
   const ConditionedSideBar: FC = () => {
@@ -49,12 +56,14 @@ export const LoggedInScreen: FC = () => {
   };
   const ConditionedLoggedInScreen: FC = () => {
     if (isConfigured) {
-      return <Content
-        selectedTask={selectedTask}
-        userId={userId}
-        timerConfig={timerConfig}
-        setTimerConfig={setTimerConfig}
-      />;
+      return (
+        <Content
+          selectedTask={selectedTask}
+          userId={userId}
+          timerConfig={timerConfig}
+          setTimerConfig={setTimerConfig}
+        />
+      );
     } else {
       return <ConfigScreen userConfig={userConfig} setUserConfig={setUserConfig} />;
     }

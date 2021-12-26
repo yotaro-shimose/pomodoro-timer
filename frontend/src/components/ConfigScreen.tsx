@@ -98,6 +98,7 @@ const ConfigScreen: FC<ConfigScreenProps> = (props: ConfigScreenProps) => {
       calendarId: props.userConfig.calendarId,
     };
     setState(initState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     initState();
@@ -105,7 +106,7 @@ const ConfigScreen: FC<ConfigScreenProps> = (props: ConfigScreenProps) => {
   }, []);
   const nextStep = () => {
     if (state.step !== StepList.TASKLIST) {
-      throw "Unexpected Step!";
+      throw Error("Unexpected Step!");
     }
     const nextState = { ...state, step: StepList.CALENDAR };
     setState(nextState);
@@ -188,7 +189,7 @@ const ConfigScreen: FC<ConfigScreenProps> = (props: ConfigScreenProps) => {
         return failureScreen;
       }
       default:
-        throw "Unexpected Step";
+        throw Error("Unexpected Step");
     }
   })();
 
