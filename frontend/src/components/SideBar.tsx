@@ -5,18 +5,21 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import { createStyles } from "@material-ui/core/styles";
 
-import { Task, APIError } from "../interfaces";
+import { Task } from "../interfaces";
 
 import { fetchTask } from "../api";
-import { useSetRecoilState, useRecoilValue, useRecoilState } from "recoil";
-import { needConfigState, taskListState, userProfileState } from "../atoms";
+import { useRecoilValue, useRecoilState } from "recoil";
+import { taskListState, userIdState } from "../atoms";
 
 interface SideBarProps {
   drawerWidth: number;
+  selectedTask: Task | null;
+  setSelectedTask(task: Task | null): void;
+  setTimerConfig(timerConfig: number | null): void;
 }
 
 const SideBar: FC<SideBarProps> = (props: SideBarProps) => {
-  const useStyles = makeStyles((theme: Theme) =>
+  const useStyles = makeStyles((_theme: Theme) =>
     createStyles({
       drawer: {
         width: props.drawerWidth,
@@ -31,19 +34,15 @@ const SideBar: FC<SideBarProps> = (props: SideBarProps) => {
     })
   );
   const classes = useStyles();
-  const setNeedConfig = useSetRecoilState(needConfigState);
-  const userProfile = useRecoilValue(userProfileState);
+  const userId = useRecoilValue(userIdState);
   const [taskList, setTaskList] = useRecoilState(taskListState);
-  // TODO タスクリストをステートレスに
   useEffect(() => {
-    fetchTask(userProfile.id)
-      .then((taskList: Task[]) => {
-        setTaskList(taskList);
-      })
-      .catch((_error: APIError) => {
-        setNeedConfig(true);
-      });
-  }, []);
+    fetchTask(userId).then((taskList: Task[]) => {
+      setTaskList(taskList);
+    });
+  }, [setTaskList, userId]);
+  const selectedTaskId = props.selectedTask ? props.selectedTask.id : null;
+
   return (
     <Drawer
       className={classes.drawer}
@@ -57,7 +56,14 @@ const SideBar: FC<SideBarProps> = (props: SideBarProps) => {
       <div className={classes.drawerContainer}>
         <List>
           {taskList.map((task, index) => (
-            <ListItem button key={index}>
+            <ListItem
+              button key={index}
+              selected={task.id === selectedTaskId}
+              onClick={() => {
+                props.setSelectedTask(task);
+                props.setTimerConfig(null);
+              }
+              }>
               <ListItemText primary={task.name} />
             </ListItem>
           ))}

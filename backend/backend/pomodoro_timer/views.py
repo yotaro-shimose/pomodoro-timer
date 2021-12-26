@@ -1,5 +1,4 @@
 import json
-import re
 from django.http import HttpResponse, response
 from django.http.request import HttpRequest
 from google.oauth2.credentials import Credentials
@@ -10,6 +9,7 @@ from pathlib import Path
 import os
 from pomodoro_timer.models import User
 import hashlib
+from datetime import datetime
 
 CLIENT_SECRET_PATH = Path(".").joinpath(".google_auth", "client_secret.json")
 CLIENT_ID = "812434553636-nk0sd63psg9h3mjrqorf1jkvugglf7d8.apps.googleusercontent.com"
@@ -45,31 +45,6 @@ def get_task(request: HttpRequest) -> HttpResponse:
     items = results.get("items", [])
     task_list = [{"id": item["id"], "name": item["title"]} for item in items]
     return HttpResponse(json.dumps(task_list, ensure_ascii=False))
-
-
-def list_calendar(request: HttpRequest) -> HttpResponse:
-    body = parse_body(request.body)
-    access_token = body["accessToken"]
-    refresh_token = body["refreshToken"]
-    credentials = Credentials(
-        access_token,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        scopes=SCOPES,
-        refresh_token=refresh_token,
-    )
-    if not credentials.valid:
-        credentials.refresh(Request())
-    service = build("calendar", "v3", credentials=credentials)
-    google_response = service.calendarList().list(showHidden=True,).execute()
-    calendar_list = google_response["items"]
-    response = {
-        "items": [
-            {"summary": item["summary"], "id": item["id"]} for item in calendar_list
-        ]
-    }
-    return HttpResponse(json.dumps(response))
 
 
 def _create_hash_data(gmail_address: str) -> str:
@@ -111,13 +86,15 @@ def login(request: HttpRequest) -> HttpResponse:
             refresh_token=token_response["refresh_token"],
         )
         User.save(user)
-    return HttpResponse(json.dumps(user.get_response(), ensure_ascii=False,))
+    response = {"id": user.id}
+    return HttpResponse(json.dumps(response, ensure_ascii=False))
 
 
 def _get_user(request: HttpRequest) -> HttpResponse:
     id = request.headers["id"]
     user: User = User.objects.get(id=id)
-    return HttpResponse(json.dumps(user.get_response(), ensure_ascii=False))
+    response = {"id": user.id}
+    return HttpResponse(json.dumps(response, ensure_ascii=False))
 
 
 def _update_user(request: HttpRequest) -> HttpResponse:
@@ -126,10 +103,11 @@ def _update_user(request: HttpRequest) -> HttpResponse:
     user: User = User.objects.select_for_update().filter(id=id).first()
     user.access_token = body.get("accessToken", user.access_token)
     user.refresh_token = body.get("refreshToken", user.refresh_token)
-    user.calender_id = body.get("calenderId", user.calender_id)
+    user.calendar_id = body.get("calendarId", user.calendar_id)
     user.task_list_id = body.get("taskListId", user.task_list_id)
     User.save(user)
-    return HttpResponse(json.dumps(user.get_response(), ensure_ascii=False,))
+    response = {"id": user.id}
+    return HttpResponse(json.dumps(response, ensure_ascii=False))
 
 
 def collect_user(request: HttpRequest) -> HttpResponse:
@@ -181,9 +159,9 @@ def get_task(request: HttpRequest) -> HttpResponse:
         credentials.refresh(Request())
 
     service = build("tasks", "v1", credentials=credentials)
-    items = service.tasks().list(tasklist=task_list_id).execute().get("items")
+    items = service.tasks().list(tasklist=task_list_id, showCompleted=False).execute().get("items")
     response_list = [
-        {"id": item.get("id"), "summary": item.get("title")} for item in items
+        {"id": item.get("id"), "name": item.get("title")} for item in items
     ]
 
     return HttpResponse(json.dumps(response_list, ensure_ascii=False))
@@ -203,11 +181,57 @@ def get_calendar(request: HttpRequest) -> HttpResponse:
     if not credentials.valid:
         credentials.refresh(Request())
     service = build("calendar", "v3", credentials=credentials)
-    google_response = service.calendarList().list(showHidden=True,).execute()
+    google_response = service.calendarList().list(showHidden=True).execute()
     calendar_list = google_response["items"]
+    response = [
+        {"summary": item["summary"], "id": item["id"]} for item in calendar_list
+    ]
+    return HttpResponse(json.dumps(response, ensure_ascii=False))
+
+
+def get_user_config(request: HttpRequest) -> HttpResponse:
+    id = request.headers["id"]
+    user: User = User.objects.get(id=id)
     response = {
-        "items": [
-            {"summary": item["summary"], "id": item["id"]} for item in calendar_list
-        ]
+        "taskListId": user.task_list_id,
+        "calendarId": user.calendar_id,
     }
     return HttpResponse(json.dumps(response, ensure_ascii=False))
+
+
+def insert_event(request: HttpRequest) -> HttpResponse:
+    id = request.headers["id"]
+    body = parse_body(request.body)
+    user: User = User.objects.get(id=id)
+    credentials = Credentials(
+        token=user.access_token,
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        scopes=SCOPES,
+        refresh_token=user.refresh_token,
+    )
+    if not credentials.valid:
+        credentials.refresh(Request())
+    service = build("calendar", "v3", credentials=credentials)
+    google_request = {
+        "calendarId": user.calendar_id,
+        "body": {
+            "start": {
+                "dateTime": datetime.strptime(
+                    body["startTime"], r"%Y-%m-%d %H:%M:%S"
+                ).isoformat(),
+                "timeZone": "Asia/Tokyo",
+            },
+            "end": {
+                "dateTime": datetime.strptime(
+                    body["endTime"], r"%Y-%m-%d %H:%M:%S"
+                ).isoformat(),
+                "timeZone": "Asia/Tokyo",
+            },
+            "summary": body["task"]["name"],
+        },
+    }
+
+    _google_response = service.events().insert(**google_request).execute()
+    return HttpResponse("Ok")

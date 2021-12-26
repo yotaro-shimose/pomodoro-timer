@@ -18,18 +18,12 @@ export interface TaskList {
   id: string;
 }
 
-export interface Config {
-  calendarId: string;
-  taskListId: string;
-}
-
 export interface APIError {
   status: number;
   reason: string;
 }
 
-export interface UserProfile {
-  id: string;
+export interface UserConfig {
   taskListId: string;
   calendarId: string;
 }
@@ -40,6 +34,8 @@ export interface Timer {
   end: number;
 }
 
-export interface UserId {
-  id: string
+export interface Event {
+  task: Task,
+  startTime: string,
+  endTime: string
 }

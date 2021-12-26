@@ -10,9 +10,9 @@ import Button from "@material-ui/core/Button";
 
 // State
 import { atom } from "recoil";
-import { TaskList, Calendar, Config as UserConfig, UserProfile } from "../interfaces";
+import { TaskList, Calendar, UserConfig } from "../interfaces";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { userProfileState } from "../atoms";
+import { userIdState } from "../atoms";
 
 // axios
 import axios from "axios";
@@ -22,7 +22,7 @@ import { BackendURL } from "../constants";
 import MsgScreen from "./MsgScreen";
 
 // API
-import { fetchTaskList, fetchCalendar, fetchUserProfile } from "../api";
+import { fetchTaskList, fetchCalendar } from "../api";
 
 const taskListListState = atom<TaskList[]>({
   key: "taskList",
@@ -58,17 +58,23 @@ let configState = atom<State>({
   },
 });
 
-const ConfigScreen: FC = () => {
+interface ConfigScreenProps {
+  userConfig: UserConfig;
+  setUserConfig(config: UserConfig): void;
+}
+
+const ConfigScreen: FC<ConfigScreenProps> = (props: ConfigScreenProps) => {
   const [taskListList, setTaskListList] = useRecoilState(taskListListState);
   const [calendarList, setCalendarList] = useRecoilState(calendarListState);
   const [state, setState] = useRecoilState(configState);
-  const userProfile = useRecoilValue(userProfileState);
+  const userId = useRecoilValue(userIdState);
   const sendConfig = async (config: UserConfig) => {
+    console.log("config", config);
     axios
       .put<boolean>(`${BackendURL}/user`, config, {
         headers: {
           "Content-Type": "application/json",
-          // userId: userProfile.id,
+          id: userId,
         },
       })
       .then(() => {
@@ -80,27 +86,27 @@ const ConfigScreen: FC = () => {
   };
 
   const initState = useCallback(() => {
-    fetchTaskList(userProfile.id).then((taskListList: TaskList[]) => {
+    fetchTaskList(userId).then((taskListList: TaskList[]) => {
       setTaskListList(taskListList);
     });
-    fetchCalendar(userProfile.id).then((calendarList: Calendar[]) => {
+    fetchCalendar(userId).then((calendarList: Calendar[]) => {
       setCalendarList(calendarList);
     });
-    fetchUserProfile(userProfile.id).then((userProfile: UserProfile) => {
-      const initState = {
-        ...state,
-        taskListId: userProfile.taskListId,
-        calendarId: userProfile.calendarId,
-      };
-      setState(initState);
-    });
+    const initState = {
+      ...state,
+      taskListId: props.userConfig.taskListId,
+      calendarId: props.userConfig.calendarId,
+    };
+    setState(initState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     initState();
-  }, [initState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const nextStep = () => {
     if (state.step !== StepList.TASKLIST) {
-      throw "Unexpected Step!";
+      throw Error("Unexpected Step!");
     }
     const nextState = { ...state, step: StepList.CALENDAR };
     setState(nextState);
@@ -115,12 +121,13 @@ const ConfigScreen: FC = () => {
       setState(nextState);
     };
   const hundleSubmit: () => void = () => {
-    // TODO fetchTask
     const config: UserConfig = {
       taskListId: state.taskListId,
       calendarId: state.calendarId,
     };
     sendConfig(config);
+    console.log("refreshing");
+    props.setUserConfig(config);
   };
 
   const taskListForm = (
@@ -182,7 +189,7 @@ const ConfigScreen: FC = () => {
         return failureScreen;
       }
       default:
-        throw "Unexpected Step";
+        throw Error("Unexpected Step");
     }
   })();
 

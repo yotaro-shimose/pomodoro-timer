@@ -1,70 +1,79 @@
 // React
 import { FC, useEffect } from "react";
-import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 
 // Material UI
-import { Typography, Toolbar } from "@material-ui/core";
+import { Toolbar } from "@material-ui/core";
 
 // Components
 import SideBar from "./SideBar";
 import ConfigScreen from "./ConfigScreen";
-
-// interfaces
-import { Task, APIError } from "../interfaces";
+import Content from "./Content";
 
 // State
-import { atom, useRecoilState, useRecoilValue } from "recoil";
-import { userProfileState, taskListState } from "../atoms";
+import { useRecoilValue, useRecoilState } from "recoil";
+import {
+  isConfiguredState,
+  userConfigState,
+  userIdState,
+  selectedTaskState,
+  timerConfigState,
+} from "../atoms";
 
 // API
-import { fetchTask } from "../api";
+import { fetchUserConfig } from "../api";
+
+// Interfaces
+import { UserConfig } from "../interfaces";
 
 const drawerWidth = 240;
 
-const needConfigState = atom<boolean>({
-  key: "needConfig",
-  default: false,
-});
-
 export const LoggedInScreen: FC = () => {
-  const userProfile = useRecoilValue(userProfileState);
-  const [needConfig, setNeedConfig] = useRecoilState(needConfigState);
-  const [taskList, setTaskList] = useRecoilState(taskListState);
-  let MainContent: FC = () => {
-    return (
-      <Typography>
-        <h3>This is a main content</h3>
-      </Typography>
-    );
-  };
+  const userId = useRecoilValue(userIdState);
+  const [userConfig, setUserConfig] = useRecoilState(userConfigState);
+  const [selectedTask, setSelectedTask] = useRecoilState(selectedTaskState);
+  const [timerConfig, setTimerConfig] = useRecoilState(timerConfigState);
 
+  useEffect(() => {
+    fetchUserConfig(userId).then((userConfig: UserConfig) => {
+      setUserConfig(userConfig);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const isConfigured = useRecoilValue(isConfiguredState);
   const ConditionedSideBar: FC = () => {
-    if (userProfile.taskListId) {
-      return <SideBar drawerWidth={drawerWidth} />;
+    if (isConfigured) {
+      return (
+        <SideBar
+          drawerWidth={drawerWidth}
+          selectedTask={selectedTask}
+          setSelectedTask={setSelectedTask}
+          setTimerConfig={setTimerConfig}
+        />
+      );
     } else {
       return null;
     }
   };
-  useEffect(() => {
-    fetchTask(userProfile.id)
-      .then((taskList: Task[]) => {
-        setTaskList(taskList);
-      })
-      .catch((_error: APIError) => {
-        setNeedConfig(true);
-      });
-  }, []);
+  const ConditionedLoggedInScreen: FC = () => {
+    if (isConfigured) {
+      return (
+        <Content
+          selectedTask={selectedTask}
+          userId={userId}
+          timerConfig={timerConfig}
+          setTimerConfig={setTimerConfig}
+        />
+      );
+    } else {
+      return <ConfigScreen userConfig={userConfig} setUserConfig={setUserConfig} />;
+    }
+  };
+
   return (
     <div className="LoggedInScreen">
       <ConditionedSideBar />
       <Toolbar />
-      <Router>
-        <Route path="/" render={() => (needConfig ? <Redirect to="/config" /> : <MainContent />)} />
-        <Route exact path="/config">
-          <ConfigScreen />
-        </Route>
-      </Router>
-      {/* <TimerScreen name={taskName} duration={10} onDone={onDone} /> */}
+      <ConditionedLoggedInScreen />
     </div>
   );
 };
