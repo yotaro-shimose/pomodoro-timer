@@ -8,6 +8,7 @@ import { Toolbar, Typography } from "@material-ui/core";
 import PomodoroTimer from "./timer/PomodoroTimer";
 import PomodoroStopWatch from "./timer/PomodoroStopWatch";
 interface ContentProps {
+  userId: string;
   selectedTask: Task | null;
 }
 const Content: FC<ContentProps> = (props) => {
@@ -16,10 +17,10 @@ const Content: FC<ContentProps> = (props) => {
   if (props.selectedTask) {
     if (timerConfig != null) {
       if (timerConfig) {
-        content = <PomodoroTimer timerConfig={timerConfig} task={props.selectedTask}></PomodoroTimer>
+        content = <PomodoroTimer userId={props.userId} timerConfig={timerConfig} task={props.selectedTask}></PomodoroTimer>
       }
       else {
-        content = <PomodoroStopWatch task={props.selectedTask}></PomodoroStopWatch>
+        content = <PomodoroStopWatch userId={props.userId} task={props.selectedTask}></PomodoroStopWatch>
       }
     }
     else {

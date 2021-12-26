@@ -6,14 +6,15 @@ import TimerButton from "./atoms/TimerButton";
 import TimerScreen from "./atoms/TimerScreen";
 import ConfirmDialog from "./ConfirmDialog";
 import { startTimeState } from "../../atoms";
-import { confirmFinishFactory, timerFinishFactory } from "../../factory";
+import { cancelFinishFactory, confirmFinishFactory, timerFinishFactory } from "../../factory";
 import { Task } from "../../interfaces";
 // State
-import { useRecoilValue, useRecoilState } from "recoil";
+import { useRecoilState } from "recoil";
 
 interface PomodoroTimerProps {
-    timerConfig: number
-    task: Task
+    userId: string;
+    timerConfig: number;
+    task: Task;
 }
 
 const PomodoroTimer: FC<PomodoroTimerProps> = (props) => {
@@ -46,7 +47,8 @@ const PomodoroTimer: FC<PomodoroTimerProps> = (props) => {
         }
     ]
 
-    const finish = timerFinishFactory(startTime);
+    const finish = timerFinishFactory(props.userId, props.task, startTime, handleClose);
+    const cancel = cancelFinishFactory(start, handleClose)
 
     return (
         <div className="PomodoroTimer">
@@ -63,7 +65,7 @@ const PomodoroTimer: FC<PomodoroTimerProps> = (props) => {
                     </Grid>
                 ))}
             </Grid>
-            <ConfirmDialog open={open} onClose={handleClose} func={finish}></ConfirmDialog>
+            <ConfirmDialog open={open} onClose={handleClose} finishFunc={finish} cancelFunc={cancel}></ConfirmDialog>
         </div>
     )
 }

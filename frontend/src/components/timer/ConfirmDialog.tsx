@@ -2,9 +2,10 @@ import { FC } from "react";
 import TimerButton from "./atoms/TimerButton";
 import { Grid, Dialog, DialogTitle, DialogContent } from "@material-ui/core";
 interface ConfirmDialogProps {
-    open: boolean,
-    onClose(): void,
-    func(): void
+    open: boolean;
+    onClose(): void;
+    finishFunc(): void;
+    cancelFunc(): void;
 }
 const ConfirmDialog: FC<ConfirmDialogProps> = (props) => {
 
@@ -20,10 +21,10 @@ const ConfirmDialog: FC<ConfirmDialogProps> = (props) => {
             <DialogContent dividers={true}>
                 <Grid container spacing={6} alignItems="center" justifyContent="center">
                     <Grid item>
-                        <TimerButton buttonName="終了" func={props.func} />
+                        <TimerButton buttonName="終了" func={props.finishFunc} />
                     </Grid>
                     <Grid item>
-                        <TimerButton buttonName="キャンセル" func={props.func} />
+                        <TimerButton buttonName="キャンセル" func={props.cancelFunc} />
                     </Grid>
                 </Grid>
             </DialogContent>
