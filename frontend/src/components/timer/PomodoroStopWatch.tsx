@@ -30,6 +30,9 @@ const PomodoroStopWatch: FC<PomodoroStopWatchProps> = (props) => {
   const { seconds, minutes, hours, days, isRunning, start, pause, reset } = useStopwatch({
     autoStart: true,
   });
+  const dispHours = ('00' + hours).slice(-2);
+  const dispMinutes = ('00' + minutes).slice(-2);
+  const dispSeconds = ('00' + seconds).slice(-2);
 
   const confirmFinish = confirmFinishFactory(pause, handleOpen);
   const finishName = "finish";
@@ -47,7 +50,7 @@ const PomodoroStopWatch: FC<PomodoroStopWatchProps> = (props) => {
     <div className="StopWatchScreen">
       <Toolbar />
       <Typography variant="h3">{props.task.name}</Typography>
-      <StopWatchScreen days={days} hours={hours} minutes={minutes} seconds={seconds} />
+      <StopWatchScreen hours={dispHours} minutes={dispMinutes} seconds={dispSeconds} />
       <Grid container spacing={6} alignItems="center" justifyContent="center">
         {buttonDataList.map((buttonData, index) => (
           <Grid item>

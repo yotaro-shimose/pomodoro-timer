@@ -5,8 +5,8 @@ import { makeStyles, Theme } from "@material-ui/core";
 import { createStyles } from "@material-ui/core/styles";
 
 interface TimerScreenProps {
-    minutes: number,
-    seconds: number
+    minutes: string,
+    seconds: string
 }
 
 const useStyles = makeStyles((theme: Theme) =>
