@@ -1,5 +1,5 @@
 // React
-import { FC, useEffect } from "react";
+import { FC, useLayoutEffect } from "react";
 
 // Material UI
 import { Toolbar } from "@material-ui/core";
@@ -33,7 +33,7 @@ export const LoggedInScreen: FC = () => {
   const [selectedTask, setSelectedTask] = useRecoilState(selectedTaskState);
   const [timerConfig, setTimerConfig] = useRecoilState(timerConfigState);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     fetchUserConfig(userId).then((userConfig: UserConfig) => {
       setUserConfig(userConfig);
     });

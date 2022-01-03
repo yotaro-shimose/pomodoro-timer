@@ -1,6 +1,5 @@
 import { Task, TaskList, Calendar, UserConfig, Event } from "./interfaces";
 import axios, { AxiosResponse } from "axios";
-import { BackendURL } from "./constants";
 
 interface LoginResponse {
   id: string;
@@ -10,6 +9,8 @@ interface Headers {
   "Content-Type": string;
   id: string;
 }
+
+const BackendURL = process.env.REACT_APP_BACKEND_URL;
 
 const get_headers: (id: string) => Headers = (id: string) => {
   return {
@@ -52,17 +53,13 @@ export const fetchCalendar: (id: string) => Promise<Calendar[]> = async (id: str
 };
 
 export const pushEvent: (id: string, event: Event) => void = async (id: string, event: Event) => {
-  await axios
-    .post(`${BackendURL}/event`,
-      event
-      , {
-        headers: {
-          "Content-Type": "application/json",
-          id: id,
-        },
-      });
-}
-
+  await axios.post(`${BackendURL}/event`, event, {
+    headers: {
+      "Content-Type": "application/json",
+      id: id,
+    },
+  });
+};
 
 export const login: (code: string) => Promise<string> = async (code: string) => {
   const userId = await axios

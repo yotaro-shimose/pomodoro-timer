@@ -1,5 +1,5 @@
 import json
-from django.http import HttpResponse, response
+from django.http import HttpResponse
 from django.http.request import HttpRequest
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -12,8 +12,8 @@ import hashlib
 from datetime import datetime
 
 CLIENT_SECRET_PATH = Path(".").joinpath(".google_auth", "client_secret.json")
-CLIENT_ID = "812434553636-nk0sd63psg9h3mjrqorf1jkvugglf7d8.apps.googleusercontent.com"
-CLIENT_SECRET = "x6BHVdY60JkAt_1vyeeqPjpI"
+CLIENT_ID = "812434553636-fgbcvbb4utqo944hef5lrhnmbe93rkia.apps.googleusercontent.com"
+CLIENT_SECRET = "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"
 REDIRECT_URI = "postmessage"
 SCOPES = [
     "https://www.googleapis.com/auth/calendar",
@@ -78,14 +78,16 @@ def login(request: HttpRequest) -> HttpResponse:
 
     exists_user = User.objects.filter(id=id).count() == 1
     if exists_user:
-        user = User.objects.get(id=id)
+        user: User = User.objects.get(id=id)
+        user.access_token = token_response["access_token"]
+        user.refresh_token = token_response["refresh_token"]
     else:
         user = User(
             id=id,
             access_token=token_response["access_token"],
             refresh_token=token_response["refresh_token"],
         )
-        User.save(user)
+    User.save(user)
     response = {"id": user.id}
     return HttpResponse(json.dumps(response, ensure_ascii=False))
 
@@ -159,7 +161,12 @@ def get_task(request: HttpRequest) -> HttpResponse:
         credentials.refresh(Request())
 
     service = build("tasks", "v1", credentials=credentials)
-    items = service.tasks().list(tasklist=task_list_id, showCompleted=False).execute().get("items")
+    items = (
+        service.tasks()
+        .list(tasklist=task_list_id, showCompleted=False)
+        .execute()
+        .get("items")
+    )
     response_list = [
         {"id": item.get("id"), "name": item.get("title")} for item in items
     ]
@@ -232,6 +239,8 @@ def insert_event(request: HttpRequest) -> HttpResponse:
             "summary": body["task"]["name"],
         },
     }
-
-    _google_response = service.events().insert(**google_request).execute()
+    try:
+        _google_response = service.events().insert(**google_request).execute()
+    except Exception as e:
+        print(e)
     return HttpResponse("Ok")
