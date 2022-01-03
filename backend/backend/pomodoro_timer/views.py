@@ -12,8 +12,8 @@ import hashlib
 from datetime import datetime
 
 CLIENT_SECRET_PATH = Path(".").joinpath(".google_auth", "client_secret.json")
-CLIENT_ID = "812434553636-nk0sd63psg9h3mjrqorf1jkvugglf7d8.apps.googleusercontent.com"
-CLIENT_SECRET = "x6BHVdY60JkAt_1vyeeqPjpI"
+CLIENT_ID = "812434553636-fgbcvbb4utqo944hef5lrhnmbe93rkia.apps.googleusercontent.com"
+CLIENT_SECRET = "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"
 REDIRECT_URI = "postmessage"
 SCOPES = [
     "https://www.googleapis.com/auth/calendar",
