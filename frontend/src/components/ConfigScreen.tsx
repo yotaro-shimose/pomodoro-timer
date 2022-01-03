@@ -18,11 +18,12 @@ import { userIdState } from "../atoms";
 import axios from "axios";
 
 // endpoint
-import { BackendURL } from "../constants";
 import MsgScreen from "./MsgScreen";
 
 // API
 import { fetchTaskList, fetchCalendar } from "../api";
+
+const BackendURL = process.env.REACT_APP_BACKEND_URL;
 
 const taskListListState = atom<TaskList[]>({
   key: "taskList",
