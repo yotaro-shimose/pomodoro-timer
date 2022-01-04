@@ -21,17 +21,10 @@ SCOPES = [
 ]
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 
-
-def parse_body(body: bytes) -> dict[str, str]:
-    return json.loads(body.decode("utf-8"))
-
-
-def get_task(request: HttpRequest) -> HttpResponse:
-    access_token = request.META["access_token"]
-    refresh_token = request.META["refresh_token"]
+def get_credentials(user: User) -> Credentials:
     credentials = Credentials(
-        token=access_token,
-        refresh_token=refresh_token,
+        token=user.access_token,
+        refresh_token=user.refresh_token,
         token_uri="https://oauth2.googleapis.com/token",
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
@@ -39,12 +32,14 @@ def get_task(request: HttpRequest) -> HttpResponse:
     )
     if not credentials.valid:
         credentials.refresh(Request())
+        access_token = credentials.token
+        refresh_token = credentials.refresh_token
+        user.access_token = access_token
+        user.refresh_token = refresh_token
+    return credentials
 
-    service = build("tasks", "v1", credentials=credentials)
-    results = service.tasklists().list().execute()
-    items = results.get("items", [])
-    task_list = [{"id": item["id"], "name": item["title"]} for item in items]
-    return HttpResponse(json.dumps(task_list, ensure_ascii=False))
+def parse_body(body: bytes) -> dict[str, str]:
+    return json.loads(body.decode("utf-8"))
 
 
 def _create_hash_data(gmail_address: str) -> str:
@@ -122,19 +117,11 @@ def collect_user(request: HttpRequest) -> HttpResponse:
         return
 
 
+
 def get_task_list(request: HttpRequest) -> HttpResponse:
     id = request.headers["id"]
     user: User = User.objects.get(id=id)
-    credentials = Credentials(
-        token=user.access_token,
-        refresh_token=user.refresh_token,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        scopes=SCOPES,
-    )
-    if not credentials.valid:
-        credentials.refresh(Request())
+    credentials = get_credentials(user)
 
     service = build("tasks", "v1", credentials=credentials)
     items = service.tasklists().list().execute().get("items")
@@ -148,18 +135,9 @@ def get_task_list(request: HttpRequest) -> HttpResponse:
 def get_task(request: HttpRequest) -> HttpResponse:
     id = request.headers["id"]
     user: User = User.objects.get(id=id)
-    task_list_id = user.task_list_id
-    credentials = Credentials(
-        token=user.access_token,
-        refresh_token=user.refresh_token,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        scopes=SCOPES,
-    )
-    if not credentials.valid:
-        credentials.refresh(Request())
+    credentials = get_credentials(user)
 
+    task_list_id = user.task_list_id
     service = build("tasks", "v1", credentials=credentials)
     items = (
         service.tasks()
@@ -177,16 +155,7 @@ def get_task(request: HttpRequest) -> HttpResponse:
 def get_calendar(request: HttpRequest) -> HttpResponse:
     id = request.headers["id"]
     user: User = User.objects.get(id=id)
-    credentials = Credentials(
-        token=user.access_token,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        scopes=SCOPES,
-        refresh_token=user.refresh_token,
-    )
-    if not credentials.valid:
-        credentials.refresh(Request())
+    credentials = get_credentials(user)
     service = build("calendar", "v3", credentials=credentials)
     google_response = service.calendarList().list(showHidden=True).execute()
     calendar_list = google_response["items"]
@@ -210,16 +179,7 @@ def insert_event(request: HttpRequest) -> HttpResponse:
     id = request.headers["id"]
     body = parse_body(request.body)
     user: User = User.objects.get(id=id)
-    credentials = Credentials(
-        token=user.access_token,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        scopes=SCOPES,
-        refresh_token=user.refresh_token,
-    )
-    if not credentials.valid:
-        credentials.refresh(Request())
+    credentials = get_credentials(user)
     service = build("calendar", "v3", credentials=credentials)
     google_request = {
         "calendarId": user.calendar_id,

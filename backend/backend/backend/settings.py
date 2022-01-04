@@ -38,10 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest_framework",
     "oauth2_provider",
     "social_django",
-    "drf_social_oauth2",
     "corsheaders",
     "pomodoro_timer",
 ]
