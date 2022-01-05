@@ -80,6 +80,8 @@ const ConfigScreen: FC<ConfigScreenProps> = (props: ConfigScreenProps) => {
       })
       .then(() => {
         setState({ ...state, step: StepList.SUCCESS });
+        console.log("refreshing");
+        props.setUserConfig(config);
       })
       .catch(() => {
         setState({ ...state, step: StepList.FAILURE });
@@ -127,8 +129,6 @@ const ConfigScreen: FC<ConfigScreenProps> = (props: ConfigScreenProps) => {
       calendarId: state.calendarId,
     };
     sendConfig(config);
-    console.log("refreshing");
-    props.setUserConfig(config);
   };
 
   const taskListForm = (
