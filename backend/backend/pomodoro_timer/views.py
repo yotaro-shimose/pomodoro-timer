@@ -7,7 +7,7 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import Flow
 from pathlib import Path
 import os
-from pomodoro_timer.models import User
+from pomodoro_timer.domain.model.entity.user import User
 import hashlib
 from datetime import datetime
 
@@ -20,6 +20,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/tasks",
 ]
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
+
 
 def get_credentials(user: User) -> Credentials:
     credentials = Credentials(
@@ -37,6 +38,7 @@ def get_credentials(user: User) -> Credentials:
         user.access_token = access_token
         user.refresh_token = refresh_token
     return credentials
+
 
 def parse_body(body: bytes) -> dict[str, str]:
     return json.loads(body.decode("utf-8"))
@@ -115,7 +117,6 @@ def collect_user(request: HttpRequest) -> HttpResponse:
         return _update_user(request)
     else:
         return
-
 
 
 def get_task_list(request: HttpRequest) -> HttpResponse:
