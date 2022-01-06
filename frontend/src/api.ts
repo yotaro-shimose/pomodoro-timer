@@ -1,29 +1,36 @@
 import { Task, TaskList, Calendar, UserConfig, Event } from "./interfaces";
-import axios, { AxiosResponse } from "axios";
-
+import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
+import https from "https";
 interface LoginResponse {
   id: string;
 }
 
-interface Headers {
-  "Content-Type": string;
-  id: string;
-}
+const BackendURL = "http://localhost:8000";
+// const BackendURL = "https://54.238.9.74:8000";
 
-const BackendURL = process.env.REACT_APP_BACKEND_URL;
-
-const get_headers: (id: string) => Headers = (id: string) => {
-  return {
+const get_config: (id?: string) => AxiosRequestConfig = (id?: string) => {
+  const agent = new https.Agent({
+    rejectUnauthorized: false,
+  });
+  let headers = {
     "Content-Type": "application/json",
-    id: id,
+    id: "",
+  };
+  if (id) {
+    headers = {
+      "Content-Type": "application/json",
+      id: id,
+    };
+  }
+  return {
+    headers: headers,
+    httpsAgent: agent,
   };
 };
 
 export const fetchTask: (id: string) => Promise<Task[]> = async (id: string) => {
   const taskList = await axios
-    .get(`${BackendURL}/task`, {
-      headers: get_headers(id),
-    })
+    .get(`${BackendURL}/task`, get_config(id))
     .then((res: AxiosResponse<Task[]>) => {
       return res.data;
     });
@@ -32,9 +39,7 @@ export const fetchTask: (id: string) => Promise<Task[]> = async (id: string) => 
 
 export const fetchTaskList: (id: string) => Promise<TaskList[]> = async (id: string) => {
   const taskListList = await axios
-    .get(`${BackendURL}/taskList`, {
-      headers: get_headers(id),
-    })
+    .get(`${BackendURL}/taskList`, get_config(id))
     .then((res: AxiosResponse<TaskList[]>) => {
       return res.data;
     });
@@ -43,9 +48,7 @@ export const fetchTaskList: (id: string) => Promise<TaskList[]> = async (id: str
 
 export const fetchCalendar: (id: string) => Promise<Calendar[]> = async (id: string) => {
   const calendarList = await axios
-    .get(`${BackendURL}/calendar`, {
-      headers: get_headers(id),
-    })
+    .get(`${BackendURL}/calendar`, get_config(id))
     .then((res: AxiosResponse<Calendar[]>) => {
       return res.data;
     });
@@ -53,12 +56,7 @@ export const fetchCalendar: (id: string) => Promise<Calendar[]> = async (id: str
 };
 
 export const pushEvent: (id: string, event: Event) => void = async (id: string, event: Event) => {
-  await axios.post(`${BackendURL}/event`, event, {
-    headers: {
-      "Content-Type": "application/json",
-      id: id,
-    },
-  });
+  await axios.post(`${BackendURL}/event`, event, get_config(id));
 };
 
 export const login: (code: string) => Promise<string> = async (code: string) => {
@@ -68,11 +66,7 @@ export const login: (code: string) => Promise<string> = async (code: string) => 
       {
         authorizationCode: code,
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      get_config()
     )
     .then((res: AxiosResponse<LoginResponse>) => {
       return res.data.id;
@@ -82,9 +76,7 @@ export const login: (code: string) => Promise<string> = async (code: string) => 
 
 export const fetchUserConfig: (id: string) => Promise<UserConfig> = async (id: string) => {
   const calendarList = await axios
-    .get(`${BackendURL}/userConfig`, {
-      headers: get_headers(id),
-    })
+    .get(`${BackendURL}/userConfig`, get_config(id))
     .then((res: AxiosResponse<UserConfig>) => {
       return res.data;
     });
