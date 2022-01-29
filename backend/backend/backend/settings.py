@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-&$)bzpnl*+#@+__%*n%r-1$%bhw_gwpvxl6a*r0uf3gd69zzle
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -99,9 +99,15 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
 ]
 
 
@@ -170,5 +176,8 @@ LOGGING = {
             "formatter": "simple",
         },
     },
-    "root": {"handlers": ["info", "warning", "error"], "level": "INFO",},
+    "root": {
+        "handlers": ["info", "warning", "error"],
+        "level": "INFO",
+    },
 }
