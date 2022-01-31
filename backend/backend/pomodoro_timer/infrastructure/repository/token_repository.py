@@ -11,4 +11,4 @@ class TokenRepository(ITokenRepository):
             str(CLIENT_SECRET_PATH), scopes=SCOPES, redirect_uri=REDIRECT_URI,
         )
         token = flow.fetch_token(code=code)
-        return Token(token["access_token"], refresh_token=["refresh_token"])
+        return Token(token["access_token"], refresh_token=token["refresh_token"])

@@ -28,7 +28,7 @@ class UserUsecase:
         gmail_address = self._google_repository.get_gmail_address(token_response)
         id = create_user_id(gmail_address)
         user_factory = Factory()
-        exists_user = self._user_repository.is_exist(user_factory.create_user(id))
+        exists_user = self._user_repository.is_exist(id)
         if exists_user:
             user = self._user_repository.get_user(id)
             user.set_token(token_response)

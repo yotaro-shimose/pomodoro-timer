@@ -8,15 +8,12 @@ from pomodoro_timer.domain.model.entity.task_list import TaskList
 
 
 class Factory:
-    def create_user(self, id: str, token: Optional[Token] = None) -> User:
-        if token:
-            return User(
-                id=id,
-                access_token=token.access_token,
-                refresh_token=token.refresh_token,
-            )
-        else:
-            return User(id)
+    def create_user(self, id: str, token: Token) -> User:
+        return User(
+            id=id,
+            access_token=token.access_token,
+            refresh_token=token.refresh_token,
+        )
 
     def create_task_list(self, items: list[dict[str, str]]) -> list[TaskList]:
         return [TaskList(item.get("id"), item.get("title")) for item in items]
@@ -30,4 +27,3 @@ class Factory:
     def create_event(self, event_dict: dict) -> Event:
         task = Task(event_dict["task"]["id"], event_dict["task"]["name"])
         return Event(event_dict["startTime"], event_dict["endTime"], task)
-

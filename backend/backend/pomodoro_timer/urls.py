@@ -2,7 +2,6 @@ from django.urls import path
 
 from pomodoro_timer.domain.repository.iuser_repository import IUserRepository
 
-from . import views
 from pomodoro_timer.presentation.controller import (
     LoginController,
     CalendarController,
