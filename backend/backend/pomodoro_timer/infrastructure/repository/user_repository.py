@@ -4,8 +4,8 @@ from pomodoro_timer.domain.repository import IUserRepository
 
 
 class UserRepository(IUserRepository):
-    def is_exist(self, user: User) -> bool:
-        return UserDjangoModel.from_entity(user).objects.filter(pk=user.id).exists()
+    def is_exist(self, id: str) -> bool:
+        return UserDjangoModel.objects.filter(pk=id).exists()
 
     def get_user(self, id: str) -> User:
         user_model: UserDjangoModel = UserDjangoModel.objects.get(id=id)
@@ -20,9 +20,11 @@ class UserRepository(IUserRepository):
         )
 
     def register_user(self, user: User) -> User:
-        UserDjangoModel.save(user)
+        django_user = UserDjangoModel.from_entity(user)
+        UserDjangoModel.save(django_user)
         return user
 
     def update_user(self, user: User) -> User:
-        UserDjangoModel.save(user)
+        django_user = UserDjangoModel.from_entity(user)
+        UserDjangoModel.save(django_user)
         return user

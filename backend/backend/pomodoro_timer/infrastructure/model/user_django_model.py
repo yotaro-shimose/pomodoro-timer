@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from django.db import models
 from pomodoro_timer.domain.model.entity.user import User
+from pomodoro_timer.domain.model.entity.token import Token
 
 
 class UserDjangoModel(models.Model):
@@ -15,17 +16,17 @@ class UserDjangoModel(models.Model):
     def from_entity(cls, user: User) -> UserDjangoModel:
         return cls(
             user.id,
-            user.access_token,
-            user.refresh_token,
+            user.token.access_token,
+            user.token.refresh_token,
             user.calendar_id,
             user.task_list_id,
         )
 
     def to_entity(self) -> User:
+        token = Token(self.access_token, self.refresh_token)
         return User(
             id=self.id,
-            access_token=self.access_token,
-            refresh_token=self.refresh_token,
+            token=token,
             calendar_id=self.calendar_id,
             task_list_id=self.task_list_id,
         )

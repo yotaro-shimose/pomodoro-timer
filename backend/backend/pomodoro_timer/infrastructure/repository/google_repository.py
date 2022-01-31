@@ -17,15 +17,16 @@ import os
 
 class GoogleRepository(IGoogleRepository):
     def __init__(
-        self, user_repository: IUserRepository,
+        self,
+        user_repository: IUserRepository,
     ):
         os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
         self._user_repository = user_repository
 
     def _get_credentials(self, user: User) -> Credentials:
         credentials = Credentials(
-            token=user.access_token,
-            refresh_token=user.refresh_token,
+            token=user.token.access_token,
+            refresh_token=user.token.refresh_token,
             token_uri="https://oauth2.googleapis.com/token",
             client_id=CLIENT_ID,
             client_secret=CLIENT_SECRET,
@@ -33,10 +34,9 @@ class GoogleRepository(IGoogleRepository):
         )
         if not credentials.valid:
             credentials.refresh(Request())
-            access_token = credentials.token
-            refresh_token = credentials.refresh_token
-            user.access_token = access_token
-            user.refresh_token = refresh_token
+            token = Token(credentials.token, credentials.refresh_token)
+            user.set_token(token)
+            self._user_repository.update_user(user)
         return credentials
 
     def get_gmail_address(self, token: Token) -> str:

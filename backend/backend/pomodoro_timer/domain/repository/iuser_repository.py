@@ -4,7 +4,7 @@ from pomodoro_timer.domain.model.entity.user import User
 
 class IUserRepository(ABC):
     @abstractmethod
-    def is_exist(self, user: User) -> bool:
+    def is_exist(self, id: str) -> bool:
         raise NotImplementedError
 
     @abstractmethod
