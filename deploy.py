@@ -5,6 +5,7 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 import time
 from deploy_constants import (
+    GOOGLE_CLIENT_ID,
     REGION,
     ACCESS_KEY,
     SECRET,
@@ -108,9 +109,7 @@ def runserver():
 
 @dataclass
 class EnvironmentVariables:
-    REACT_APP_GOOGLE_CLIENT_ID: str = (
-        "812434553636-nk0sd63psg9h3mjrqorf1jkvugglf7d8.apps.googleusercontent.com"
-    )
+    REACT_APP_GOOGLE_CLIENT_ID: str = GOOGLE_CLIENT_ID
     REACT_APP_BACKEND_URL: str = BACKEND_URL
 
     def as_env(self) -> dict[str, str]:
