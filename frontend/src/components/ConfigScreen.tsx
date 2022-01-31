@@ -46,8 +46,8 @@ type Step = typeof StepList[keyof typeof StepList];
 
 interface State {
   step: Step;
-  taskListId: string;
-  calendarId: string;
+  taskListId: string | null;
+  calendarId: string | null;
 }
 
 let configState = atom<State>({

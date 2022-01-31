@@ -24,8 +24,8 @@ export interface APIError {
 }
 
 export interface UserConfig {
-  taskListId: string;
-  calendarId: string;
+  taskListId: string | null;
+  calendarId: string | null;
 }
 
 export interface Timer {
