@@ -1,5 +1,5 @@
 from django.contrib import admin
-from pomodoro_timer.domain.model.entity.user import User
+from pomodoro_timer.infrastructure.model import UserDjangoModel
 
 # Register your models here.
-admin.site.register(User)
+admin.site.register(UserDjangoModel)

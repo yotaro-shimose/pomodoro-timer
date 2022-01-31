@@ -1,7 +1,7 @@
-from django.db import models
-
-from pomodoro_timer.domain.model.entity.user import User
 from __future__ import annotations
+
+from django.db import models
+from pomodoro_timer.domain.model.entity.user import User
 
 
 class UserDjangoModel(models.Model):
