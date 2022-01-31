@@ -144,6 +144,7 @@ def upload_to_s3():
         ".png": "image/png",
         ".jpeg": "image/jpeg",
         ".jpg": "image/jpeg",
+        ".wav": "audio/wav",
     }
     s3 = boto3.resource(
         "s3",
