@@ -8,6 +8,7 @@ from deploy_constants import (
     GOOGLE_CLIENT_ID,
     REGION,
     ACCESS_KEY,
+    S3_BUCKET_NAME,
     SECRET,
     INSTANCE_ID,
     CONTAINER_NAME,
@@ -60,9 +61,17 @@ class Boto3Command:
 
 class DockerCommand(Boto3Command):
     def __init__(self, commands: list[str]):
+        self.validate_commands(commands)
         sub_commands = "; ".join(commands)
         commands = [f"docker exec {CONTAINER_NAME} bash -c '{sub_commands}'"]
         super().__init__(commands)
+
+    @staticmethod
+    def validate_commands(commands: list[str]):
+        for command in commands:
+            assert (
+                "'" not in command
+            ), "Single quotation can not be included in docker commands"
 
 
 def setup_dir():
@@ -142,7 +151,7 @@ def upload_to_s3():
         aws_access_key_id=ACCESS_KEY,
         aws_secret_access_key=SECRET,
     )
-    bucket = s3.Bucket("yosamasutimer")
+    bucket = s3.Bucket(S3_BUCKET_NAME)
     build_root = Path().joinpath("frontend", "build").resolve()
     for path in build_root.glob("**/*"):
         if path.is_file():
