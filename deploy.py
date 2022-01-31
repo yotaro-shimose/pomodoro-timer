@@ -24,6 +24,7 @@ import boto3
 import subprocess
 
 ACCEPTABLE_ERROR = "Already up to date.\n"
+S3_FILE_SEP = "/"
 
 
 class Boto3Command:
@@ -48,8 +49,7 @@ class Boto3Command:
         command_id = result["Command"]["CommandId"]
         time.sleep(2)
         output = self._ssm.get_command_invocation(
-            CommandId=command_id,
-            InstanceId=INSTANCE_ID,
+            CommandId=command_id, InstanceId=INSTANCE_ID,
         )
         stdout = output["StandardOutputContent"]
         stderr = output["StandardErrorContent"]
@@ -133,7 +133,25 @@ def build_frontend():
     subprocess.run("npm run build", shell=True, env=env, cwd=front_end_root)
 
 
-def upload_to_s3():
+def create_bucket():
+    s3 = boto3.resource(
+        "s3",
+        region_name=REGION,
+        aws_access_key_id=ACCESS_KEY,
+        aws_secret_access_key=SECRET,
+    )
+    bucket = s3.Bucket(S3_BUCKET_NAME)
+    return bucket
+
+
+def delete_to_s3(bucket):
+    s3_objects = list(bucket.objects.all())
+    for s3_object in s3_objects:
+        s3_object.delete()
+        print(f"deleting file: {s3_object}")
+
+
+def upload_to_s3(bucket):
     extention_map = {
         ".json": "application/json",
         ".html": "text/html",
@@ -146,25 +164,19 @@ def upload_to_s3():
         ".jpg": "image/jpeg",
         ".wav": "audio/wav",
     }
-    s3 = boto3.resource(
-        "s3",
-        region_name=REGION,
-        aws_access_key_id=ACCESS_KEY,
-        aws_secret_access_key=SECRET,
-    )
-    bucket = s3.Bucket(S3_BUCKET_NAME)
     build_root = Path().joinpath("frontend", "build").resolve()
     for path in build_root.glob("**/*"):
         if path.is_file():
             rel_path = path.relative_to(build_root)
+            str_path = S3_FILE_SEP.join(str(rel_path).split(os.sep))
             extention = path.suffix
             if extention in extention_map:
                 content_type = extention_map[extention]
             else:
                 raise ValueError(f"Unexpected Extention: {extention}")
-            print(f"uploading file: {str(path)} to {str(rel_path)}")
+            print(f"uploading file: {str(path)} to {str_path}")
             bucket.upload_file(
-                str(path), str(rel_path), ExtraArgs={"ContentType": content_type}
+                str(path), str_path, ExtraArgs={"ContentType": content_type}
             )
 
 
@@ -183,10 +195,7 @@ def invalidate_cloudfront_cache():
     res = client.create_invalidation(
         DistributionId=DISTRIBUTION_ID,
         InvalidationBatch={
-            "Paths": {
-                "Quantity": len(ITEMS),
-                "Items": ITEMS,
-            },
+            "Paths": {"Quantity": len(ITEMS), "Items": ITEMS,},
             "CallerReference": unique_string(),
         },
     )
@@ -199,7 +208,9 @@ def main():
     update()
     runserver()
     build_frontend()
-    upload_to_s3()
+    bucket = create_bucket()
+    delete_to_s3(bucket)
+    upload_to_s3(bucket)
     invalidate_cloudfront_cache()
 
 

@@ -9,8 +9,8 @@ class UserDjangoModel(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     access_token = models.CharField(max_length=255)
     refresh_token = models.CharField(max_length=255)
-    calendar_id = models.CharField(max_length=255)
-    task_list_id = models.CharField(max_length=255)
+    calendar_id = models.CharField(max_length=255, null=True)
+    task_list_id = models.CharField(max_length=255, null=True)
 
     @classmethod
     def from_entity(cls, user: User) -> UserDjangoModel:

@@ -35,6 +35,9 @@ export const isConfiguredState = selector<boolean>({
   key: "isConfigured",
   get: ({ get }) => {
     const userProfile = get(userConfigState);
+    if (userProfile.calendarId === null && userProfile.taskListId === null) {
+      return false;
+    }
     if (userProfile.calendarId !== "" && userProfile.taskListId !== "") {
       return true;
     } else {

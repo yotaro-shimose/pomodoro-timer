@@ -1,4 +1,3 @@
-from typing import Optional
 from pomodoro_timer.domain.model.entity.calendar import Calendar
 from pomodoro_timer.domain.model.entity.task import Task
 from pomodoro_timer.domain.model.entity.token import Token
