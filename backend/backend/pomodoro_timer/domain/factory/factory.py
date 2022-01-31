@@ -9,11 +9,7 @@ from pomodoro_timer.domain.model.entity.task_list import TaskList
 
 class Factory:
     def create_user(self, id: str, token: Token) -> User:
-        return User(
-            id=id,
-            access_token=token.access_token,
-            refresh_token=token.refresh_token,
-        )
+        return User(id=id, token=token)
 
     def create_task_list(self, items: list[dict[str, str]]) -> list[TaskList]:
         return [TaskList(item.get("id"), item.get("title")) for item in items]
